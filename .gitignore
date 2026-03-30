@@ -1,0 +1,89 @@
+# ==================== #
+# Global System Files  #
+# ==================== #
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.env
+.env.local
+.env.*.local
+
+# ==================== #
+# IDE and Editors      #
+# ==================== #
+.vscode/
+.idea/
+*.iws
+*.iml
+*.ipr
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# ==================== #
+# Backend (Maven/Java) #
+# ==================== #
+backend/target/
+backend/**/.mvn/wrapper/maven-wrapper.jar
+backend/**/HELP.md
+backend/**/.apt_generated
+backend/**/.factorypath
+backend/**/.springBeans
+backend/**/.sts4-cache
+backend/**/nbproject/private/
+backend/**/nbbuild/
+backend/**/dist/
+backend/**/nbdist/
+backend/**/.nb-gradle/
+
+# ==================== #
+# Frontend (React/Node)#
+# ==================== #
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/**/*.local
+
+# Logs
+frontend/logs/
+frontend/**/*.log
+frontend/**/npm-debug.log*
+frontend/**/yarn-debug.log*
+frontend/**/yarn-error.log*
+frontend/**/pnpm-debug.log*
+frontend/**/lerna-debug.log*
+
+# ==================== #
+# Build outputs        #
+# ==================== #
+**/build/
+**/out/
+**/bin/
+**/.gradle/
+
+# ==================== #
+# Package managers     #
+# ==================== #
+frontend/package-lock.json
+frontend/yarn.lock
+frontend/pnpm-lock.yaml
+backend/**/maven-status/
+
+# ==================== #
+# Temporary files      #
+# ==================== #
+.tmp/
+temp/
+*.temp
+*.bak
+*.backup
