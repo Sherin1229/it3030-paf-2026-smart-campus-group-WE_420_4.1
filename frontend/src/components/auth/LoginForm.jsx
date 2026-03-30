@@ -1,23 +1,43 @@
 import React from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const LoginForm = () => {
 	const [email, setEmail] = React.useState('');
 	const [password, setPassword] = React.useState('');
+	const [role, setRole] = React.useState('USER');
 	const [message, setMessage] = React.useState('');
+	const [submitting, setSubmitting] = React.useState(false);
+	const { login, loginWithGoogle, roleHome } = useAuth();
+	const navigate = useNavigate();
+	const location = useLocation();
 
-	const handleSubmit = (event) => {
+	const handleSubmit = async (event) => {
 		event.preventDefault();
-		// Placeholder for login logic
-		setMessage('Login functionality will be integrated with backend');
-		console.log('Login attempt with:', { email, password });
-		setTimeout(() => setMessage(''), 3000);
+		setMessage('');
+		setSubmitting(true);
+		try {
+			const profile = await login({ email, password, role });
+			const returnTo = location.state?.returnTo;
+			navigate(returnTo || roleHome[profile.role] || '/', { replace: true });
+		} catch (error) {
+			setMessage(error.message || 'Unable to sign in.');
+		} finally {
+			setSubmitting(false);
+		}
 	};
 
-	const handleGoogleLogin = () => {
-		// Placeholder for Google login
-		setMessage('Google login will be integrated with OAuth 2.0');
-		console.log('Google login initiated');
-		setTimeout(() => setMessage(''), 3000);
+	const handleGoogleLogin = async () => {
+		setMessage('');
+		setSubmitting(true);
+		try {
+			const profile = await loginWithGoogle(role);
+			navigate(roleHome[profile.role] || '/', { replace: true });
+		} catch (error) {
+			setMessage(error.message || 'Google sign-in failed.');
+		} finally {
+			setSubmitting(false);
+		}
 	};
 
 	return (
@@ -57,8 +77,21 @@ const LoginForm = () => {
 					required
 				/>
 
-				<button type="submit" className="btn btn-secondary auth-submit-btn">
-					Sign In
+				<label className="auth-label" htmlFor="login-role">
+					Role
+				</label>
+				<select
+					id="login-role"
+					className="auth-input"
+					value={role}
+					onChange={(event) => setRole(event.target.value)}
+				>
+					<option value="USER">USER</option>
+					<option value="ADMIN">ADMIN</option>
+				</select>
+
+				<button type="submit" className="btn btn-secondary auth-submit-btn" disabled={submitting}>
+					{submitting ? 'Signing In...' : 'Sign In'}
 				</button>
 			</form>
 
@@ -66,12 +99,12 @@ const LoginForm = () => {
 
 			<div className="auth-divider">or</div>
 
-			<button className="btn btn-primary login-google-btn" onClick={handleGoogleLogin}>
-				Continue with Google
+			<button className="btn btn-primary login-google-btn" onClick={handleGoogleLogin} disabled={submitting}>
+				{submitting ? 'Please wait...' : 'Continue with Google'}
 			</button>
 
 			<p className="auth-alt-link">
-				Don't have an account? <a href="/register">Create one</a>
+				Don't have an account? <Link to="/register">Create one</Link>
 			</p>
 		</div>
 	);
