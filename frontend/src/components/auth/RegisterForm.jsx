@@ -1,31 +1,49 @@
 import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const RegisterForm = () => {
 	const [fullName, setFullName] = React.useState('');
 	const [email, setEmail] = React.useState('');
 	const [password, setPassword] = React.useState('');
 	const [confirmPassword, setConfirmPassword] = React.useState('');
+	const [role, setRole] = React.useState('USER');
 	const [message, setMessage] = React.useState('');
+	const [submitting, setSubmitting] = React.useState(false);
+	const { register, loginWithGoogle, roleHome } = useAuth();
+	const navigate = useNavigate();
 
-	const handleSubmit = (event) => {
+	const handleSubmit = async (event) => {
 		event.preventDefault();
+		setMessage('');
 
 		if (password !== confirmPassword) {
 			setMessage('Passwords do not match.');
 			return;
 		}
 
-		// Placeholder for registration logic
-		setMessage('Registration will be processed by the backend');
-		console.log('Registration attempt with:', { fullName, email, password });
-		setTimeout(() => setMessage(''), 3000);
+		setSubmitting(true);
+		try {
+			const profile = await register({ name: fullName, email, password, role });
+			navigate(roleHome[profile.role] || '/', { replace: true });
+		} catch (error) {
+			setMessage(error.message || 'Unable to register.');
+		} finally {
+			setSubmitting(false);
+		}
 	};
 
-	const handleGoogleSignUp = () => {
-		// Placeholder for Google sign-up
-		setMessage('Google sign-up will be integrated with OAuth 2.0');
-		console.log('Google sign-up initiated');
-		setTimeout(() => setMessage(''), 3000);
+	const handleGoogleSignUp = async () => {
+		setMessage('');
+		setSubmitting(true);
+		try {
+			const profile = await loginWithGoogle(role);
+			navigate(roleHome[profile.role] || '/', { replace: true });
+		} catch (error) {
+			setMessage(error.message || 'Google sign-up failed.');
+		} finally {
+			setSubmitting(false);
+		}
 	};
 
 	return (
@@ -91,8 +109,21 @@ const RegisterForm = () => {
 					required
 				/>
 
-				<button type="submit" className="btn btn-secondary auth-submit-btn">
-					Sign Up
+				<label className="auth-label" htmlFor="register-role">
+					Role
+				</label>
+				<select
+					id="register-role"
+					className="auth-input"
+					value={role}
+					onChange={(event) => setRole(event.target.value)}
+				>
+					<option value="USER">USER</option>
+					<option value="ADMIN">ADMIN</option>
+				</select>
+
+				<button type="submit" className="btn btn-secondary auth-submit-btn" disabled={submitting}>
+					{submitting ? 'Creating Account...' : 'Sign Up'}
 				</button>
 			</form>
 
@@ -100,12 +131,12 @@ const RegisterForm = () => {
 
 			<div className="auth-divider">or</div>
 
-			<button className="btn btn-primary login-google-btn" onClick={handleGoogleSignUp}>
-				Sign Up with Google
+			<button className="btn btn-primary login-google-btn" onClick={handleGoogleSignUp} disabled={submitting}>
+				{submitting ? 'Please wait...' : 'Sign Up with Google'}
 			</button>
 
 			<p className="auth-alt-link">
-				Already have an account? <a href="/login">Sign in</a>
+				Already have an account? <Link to="/login">Sign in</Link>
 			</p>
 		</div>
 	);
