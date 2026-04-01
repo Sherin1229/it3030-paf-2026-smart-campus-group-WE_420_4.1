@@ -18,9 +18,11 @@ function App() {
   const currentPath = location.pathname.toLowerCase()
 
   return (
-    <div className="app-shell">
+    <div className="relative flex min-h-screen flex-col overflow-x-hidden">
+      <div className="pointer-events-none fixed -left-40 -top-40 h-[34rem] w-[34rem] rounded-full bg-blue-700/25 blur-3xl" />
+      <div className="pointer-events-none fixed -bottom-44 -right-40 h-[34rem] w-[34rem] rounded-full bg-emerald-500/20 blur-3xl" />
       <Navbar currentPath={currentPath} />
-      <main className="app-main">
+      <main className="relative z-10 flex flex-1 flex-col">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<AboutPage />} />
