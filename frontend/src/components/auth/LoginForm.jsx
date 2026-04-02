@@ -5,7 +5,6 @@ import { useAuth } from '../../context/AuthContext';
 const LoginForm = () => {
 	const [email, setEmail] = React.useState('');
 	const [password, setPassword] = React.useState('');
-	const [role, setRole] = React.useState('USER');
 	const [message, setMessage] = React.useState('');
 	const [submitting, setSubmitting] = React.useState(false);
 	const { login, loginWithGoogle, roleHome } = useAuth();
@@ -17,7 +16,7 @@ const LoginForm = () => {
 		setMessage('');
 		setSubmitting(true);
 		try {
-			const profile = await login({ email, password, role });
+			const profile = await login({ email, password });
 			const returnTo = location.state?.returnTo;
 			navigate(returnTo || roleHome[profile.role] || '/', { replace: true });
 		} catch (error) {
@@ -31,7 +30,7 @@ const LoginForm = () => {
 		setMessage('');
 		setSubmitting(true);
 		try {
-			const profile = await loginWithGoogle(role);
+			const profile = await loginWithGoogle();
 			navigate(roleHome[profile.role] || '/', { replace: true });
 		} catch (error) {
 			setMessage(error.message || 'Google sign-in failed.');
@@ -77,19 +76,6 @@ const LoginForm = () => {
 					required
 				/>
 
-				<label className="mt-1 text-sm font-semibold text-slate-200" htmlFor="login-role">
-					Role
-				</label>
-				<select
-					id="login-role"
-					className="w-full rounded-lg border border-slate-400/30 bg-slate-900/90 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-400/30"
-					value={role}
-					onChange={(event) => setRole(event.target.value)}
-				>
-					<option value="USER">USER</option>
-					<option value="ADMIN">ADMIN</option>
-				</select>
-
 				<button
 					type="submit"
 					className="mt-3 inline-flex w-full items-center justify-center rounded-lg border border-white/15 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-60"
@@ -100,6 +86,10 @@ const LoginForm = () => {
 			</form>
 
 			{message ? <p className="mt-3 text-sm text-rose-300">{message}</p> : null}
+
+			<p className="mt-2 text-xs text-slate-400">
+				Admin access uses the permanent admin credential.
+			</p>
 
 			<div className="my-3 text-center text-sm text-slate-400">or</div>
 
