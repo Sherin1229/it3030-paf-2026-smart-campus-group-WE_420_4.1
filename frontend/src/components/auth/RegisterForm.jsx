@@ -7,7 +7,6 @@ const RegisterForm = () => {
 	const [email, setEmail] = React.useState('');
 	const [password, setPassword] = React.useState('');
 	const [confirmPassword, setConfirmPassword] = React.useState('');
-	const [role, setRole] = React.useState('USER');
 	const [message, setMessage] = React.useState('');
 	const [submitting, setSubmitting] = React.useState(false);
 	const { register, loginWithGoogle, roleHome } = useAuth();
@@ -24,7 +23,7 @@ const RegisterForm = () => {
 
 		setSubmitting(true);
 		try {
-			const profile = await register({ name: fullName, email, password, role });
+			const profile = await register({ name: fullName, email, password });
 			navigate(roleHome[profile.role] || '/', { replace: true });
 		} catch (error) {
 			setMessage(error.message || 'Unable to register.');
@@ -37,7 +36,7 @@ const RegisterForm = () => {
 		setMessage('');
 		setSubmitting(true);
 		try {
-			const profile = await loginWithGoogle(role);
+			const profile = await loginWithGoogle();
 			navigate(roleHome[profile.role] || '/', { replace: true });
 		} catch (error) {
 			setMessage(error.message || 'Google sign-up failed.');
@@ -109,19 +108,6 @@ const RegisterForm = () => {
 					required
 				/>
 
-				<label className="mt-1 text-sm font-semibold text-slate-200" htmlFor="register-role">
-					Role
-				</label>
-				<select
-					id="register-role"
-					className="w-full rounded-lg border border-slate-400/30 bg-slate-900/90 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-400/30"
-					value={role}
-					onChange={(event) => setRole(event.target.value)}
-				>
-					<option value="USER">USER</option>
-					<option value="ADMIN">ADMIN</option>
-				</select>
-
 				<button
 					type="submit"
 					className="mt-3 inline-flex w-full items-center justify-center rounded-lg border border-white/15 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-60"
@@ -142,6 +128,10 @@ const RegisterForm = () => {
 			>
 				{submitting ? 'Please wait...' : 'Sign Up with Google'}
 			</button>
+
+			<p className="mt-2 text-xs text-slate-400">
+				New registrations are created as USER accounts.
+			</p>
 
 			<p className="mt-4 text-center text-sm text-slate-300">
 				Already have an account? <Link to="/login">Sign in</Link>

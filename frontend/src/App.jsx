@@ -5,9 +5,12 @@ import LoginPage from './pages/auth/LoginPage'
 import RegisterPage from './pages/auth/RegisterPage'
 import UserDashboardPage from './pages/dashboard/UserDashboardPage'
 import AdminDashboardPage from './pages/dashboard/AdminDashboardPage'
+import UserProfilePage from './pages/profile/UserProfilePage'
 import UnauthorizedPage from './pages/UnauthorizedPage'
 import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
+import UserDashboardLayout from './layouts/UserDashboardLayout'
+import AdminDashboardLayout from './layouts/AdminDashboardLayout'
 import { Route, Routes, useLocation } from 'react-router-dom'
 import ProtectedRoute from './routes/ProtectedRoute'
 import RoleRoute from './routes/RoleRoute'
@@ -16,12 +19,16 @@ import PublicOnlyRoute from './routes/PublicOnlyRoute'
 function App() {
   const location = useLocation()
   const currentPath = location.pathname.toLowerCase()
+  const isWorkspaceRoute =
+    currentPath.startsWith('/dashboard/user') ||
+    currentPath.startsWith('/dashboard/admin') ||
+    currentPath.startsWith('/profile')
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-x-hidden">
       <div className="pointer-events-none fixed -left-40 -top-40 h-[34rem] w-[34rem] rounded-full bg-blue-700/25 blur-3xl" />
       <div className="pointer-events-none fixed -bottom-44 -right-40 h-[34rem] w-[34rem] rounded-full bg-emerald-500/20 blur-3xl" />
-      <Navbar currentPath={currentPath} />
+      {!isWorkspaceRoute ? <Navbar currentPath={currentPath} /> : null}
       <main className="relative z-10 flex flex-1 flex-col">
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -35,10 +42,15 @@ function App() {
 
           <Route element={<ProtectedRoute />}>
             <Route element={<RoleRoute allowedRoles={['USER']} />}>
-              <Route path="/dashboard/user" element={<UserDashboardPage />} />
+              <Route element={<UserDashboardLayout />}>
+                <Route path="/dashboard/user" element={<UserDashboardPage />} />
+                <Route path="/profile" element={<UserProfilePage />} />
+              </Route>
             </Route>
             <Route element={<RoleRoute allowedRoles={['ADMIN']} />}>
-              <Route path="/dashboard/admin" element={<AdminDashboardPage />} />
+              <Route element={<AdminDashboardLayout />}>
+                <Route path="/dashboard/admin" element={<AdminDashboardPage />} />
+              </Route>
             </Route>
           </Route>
 
@@ -46,7 +58,7 @@ function App() {
           <Route path="*" element={<HomePage />} />
         </Routes>
       </main>
-      <Footer />
+      {!isWorkspaceRoute ? <Footer /> : null}
     </div>
   )
 }

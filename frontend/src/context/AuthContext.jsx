@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 
 const AuthContext = createContext(null)
 const AUTH_STORAGE_KEY = 'smart-campus-auth'
+const API_BASE_URL = 'http://localhost:8080/api/auth'
 
 const roleHome = {
   USER: '/dashboard/user',
@@ -23,6 +24,23 @@ const readStoredUser = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => readStoredUser())
 
+  const sendAuthRequest = async (path, payload) => {
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    })
+
+    const responseBody = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      throw new Error(responseBody?.message || 'Authentication request failed.')
+    }
+
+    return responseBody
+  }
+
   useEffect(() => {
     if (!user) {
       localStorage.removeItem(AUTH_STORAGE_KEY)
@@ -31,46 +49,23 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user))
   }, [user])
 
-  const login = async ({ email, password, role = 'USER' }) => {
-    if (!email || !password) {
-      throw new Error('Email and password are required.')
-    }
-
-    const normalizedRole = role === 'ADMIN' ? 'ADMIN' : 'USER'
-    const profile = {
-      name: email.split('@')[0] || 'Campus User',
-      email,
-      role: normalizedRole,
-      provider: 'LOCAL',
-    }
-
+  const login = async ({ email, password }) => {
+    const profile = await sendAuthRequest('/login', { email, password })
     setUser(profile)
     return profile
   }
 
-  const register = async ({ name, email, password, role = 'USER' }) => {
-    if (!name || !email || !password) {
-      throw new Error('Name, email and password are required.')
-    }
-
-    const normalizedRole = role === 'ADMIN' ? 'ADMIN' : 'USER'
-    const profile = {
-      name,
-      email,
-      role: normalizedRole,
-      provider: 'LOCAL',
-    }
-
+  const register = async ({ name, email, password }) => {
+    const profile = await sendAuthRequest('/register', { name, email, password })
     setUser(profile)
     return profile
   }
 
-  const loginWithGoogle = async (role = 'USER') => {
-    const normalizedRole = role === 'ADMIN' ? 'ADMIN' : 'USER'
+  const loginWithGoogle = async () => {
     const profile = {
-      name: normalizedRole === 'ADMIN' ? 'Campus Admin' : 'Campus User',
-      email: normalizedRole === 'ADMIN' ? 'admin.google@campus.edu' : 'user.google@campus.edu',
-      role: normalizedRole,
+      name: 'Campus User',
+      email: 'user.google@campus.edu',
+      role: 'USER',
       provider: 'GOOGLE',
     }
 
