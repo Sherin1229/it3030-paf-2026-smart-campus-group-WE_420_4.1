@@ -6,6 +6,7 @@ import RegisterPage from './pages/auth/RegisterPage'
 import UserDashboardPage from './pages/dashboard/UserDashboardPage'
 import AdminDashboardPage from './pages/dashboard/AdminDashboardPage'
 import UserProfilePage from './pages/profile/UserProfilePage'
+import CreateBookingPage from './pages/bookings/CreateBookingPage'
 import UnauthorizedPage from './pages/UnauthorizedPage'
 import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
@@ -44,6 +45,7 @@ function App() {
             <Route element={<RoleRoute allowedRoles={['USER']} />}>
               <Route element={<UserDashboardLayout />}>
                 <Route path="/dashboard/user" element={<UserDashboardPage />} />
+                <Route path="/dashboard/user/bookings/create" element={<CreateBookingPage />} />
                 <Route path="/profile" element={<UserProfilePage />} />
               </Route>
             </Route>

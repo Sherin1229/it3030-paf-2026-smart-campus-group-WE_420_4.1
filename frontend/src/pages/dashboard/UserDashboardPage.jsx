@@ -1,12 +1,25 @@
+import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 
 const UserDashboardPage = () => {
   const { user } = useAuth()
 
   const quickActions = [
-    ['Request New Booking', 'Reserve labs, halls or equipment in a few clicks.'],
-    ['Track Pending Requests', 'Monitor approvals and responses for your submissions.'],
-    ['View Recent Activity', 'See what changed in your booking timeline.'],
+    {
+      title: 'Request New Booking',
+      text: 'Reserve labs, halls or equipment in a few clicks.',
+      link: '/dashboard/user/bookings/create',
+    },
+    {
+      title: 'Track Pending Requests',
+      text: 'Monitor approvals and responses for your submissions.',
+      link: '/dashboard/user/bookings',
+    },
+    {
+      title: 'View Recent Activity',
+      text: 'See what changed in your booking timeline.',
+      link: '/dashboard/user/activity',
+    },
   ]
 
   return (
@@ -20,11 +33,17 @@ const UserDashboardPage = () => {
       </p>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
-        {quickActions.map(([title, text]) => (
-          <article key={title} className="rounded-2xl border border-sky-400/20 bg-sky-500/10 p-5">
-            <h2 className="text-base font-semibold text-white">{title}</h2>
-            <p className="mt-2 text-sm text-slate-300">{text}</p>
-          </article>
+        {quickActions.map((action) => (
+          <Link
+            key={action.title}
+            to={action.link}
+            className="group rounded-2xl border border-sky-400/20 bg-sky-500/10 p-5 transition-all hover:border-sky-500/50 hover:bg-sky-500/20"
+          >
+            <h2 className="text-base font-semibold text-white group-hover:text-sky-300 transition-colors">
+              {action.title}
+            </h2>
+            <p className="mt-2 text-sm text-slate-300">{action.text}</p>
+          </Link>
         ))}
       </div>
 
