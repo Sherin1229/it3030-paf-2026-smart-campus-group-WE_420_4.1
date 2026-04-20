@@ -44,7 +44,7 @@ const CreateBookingPage = () => {
     <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col gap-2">
         <p className="inline-flex w-fit rounded-full border border-sky-400/30 bg-sky-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-sky-300">
-          Module B: Booking Management
+          Booking Management
         </p>
         <h1 className="text-3xl font-bold text-white sm:text-4xl">Request New Booking</h1>
         <p className="max-w-2xl text-slate-300">
