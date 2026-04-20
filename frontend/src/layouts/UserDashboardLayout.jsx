@@ -1,5 +1,6 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { motion } from 'framer-motion'
 
 const UserDashboardLayout = () => {
   const location = useLocation()
@@ -7,10 +8,10 @@ const UserDashboardLayout = () => {
   const { user, logout } = useAuth()
 
   const navItem = (path) =>
-    `rounded-lg px-3 py-2 text-sm font-semibold transition ${
+    `flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-300 ${
       location.pathname === path
-        ? 'bg-sky-500 text-white shadow-md shadow-sky-900/40'
-        : 'text-slate-300 hover:bg-white/10 hover:text-white'
+        ? 'bg-indigo-500/20 text-indigo-300 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] ring-1 ring-indigo-500/30'
+        : 'text-slate-400 hover:bg-white/5 hover:text-slate-100'
     }`
 
   const initials = user?.name
@@ -28,41 +29,59 @@ const UserDashboardLayout = () => {
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-40 border-b border-white/10 bg-slate-950/90 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-3">
-          <div className="flex items-center gap-3">
-            <p className="text-sm font-bold text-white">User Workspace</p>
-            <span className="hidden text-xs text-slate-400 sm:inline">Booking access and personal tracking</span>
+    <div className="flex min-h-screen flex-col bg-[#0f172a]">
+      <motion.header
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        className="sticky top-0 z-40 border-b border-white/5 bg-slate-900/60 backdrop-blur-xl shadow-lg shadow-black/20"
+      >
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-6 py-4">
+          <div className="flex items-center gap-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/30">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"></path><path d="M18 14h-8"></path><path d="M15 18h-5"></path><path d="M10 6h8v4h-8V6Z"></path></svg>
+            </div>
+            <div>
+              <p className="text-sm font-bold tracking-wide text-white">Smart Campus</p>
+              <p className="hidden text-[11px] font-medium uppercase tracking-wider text-indigo-400 sm:block">User Workspace</p>
+            </div>
           </div>
 
-          <nav className="flex items-center gap-1">
+          <nav className="flex items-center gap-2">
             <Link to="/dashboard/user" className={navItem('/dashboard/user')}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>
               Dashboard
             </Link>
+            <Link to="/dashboard/user/bookings" className={navItem('/dashboard/user/bookings')}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path><path d="M8 7h6"></path><path d="M8 11h8"></path></svg>
+              Bookings
+            </Link>
             <Link to="/profile" className={navItem('/profile')}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
               Profile
             </Link>
           </nav>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Link
               to="/profile"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-sky-400/40 bg-sky-500/20 text-xs font-bold text-sky-200"
+              className="group relative inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-800 text-sm font-bold text-slate-300 ring-2 ring-slate-700 transition hover:ring-indigo-400"
               aria-label="Open profile"
               title="Profile"
             >
               {initials}
+              <span className="absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-slate-900 bg-emerald-500"></span>
             </Link>
             <button
               onClick={handleLogout}
-              className="rounded-lg border border-rose-400/40 bg-rose-500/20 px-3 py-2 text-xs font-semibold text-rose-200 transition hover:bg-rose-500/30"
+              className="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-rose-500/50 hover:bg-rose-500/10 hover:text-rose-400"
             >
-              Logout
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x1="9" y1="12" y2="12"></line></svg>
+              <span className="hidden sm:inline">Logout</span>
             </button>
           </div>
         </div>
-      </header>
+      </motion.header>
 
       <main className="flex-1 px-4 py-8">
         <div className="mx-auto w-full max-w-6xl">

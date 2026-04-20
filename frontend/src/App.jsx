@@ -3,9 +3,11 @@ import AboutPage from './pages/AboutPage'
 import ContactPage from './pages/ContactPage'
 import LoginPage from './pages/auth/LoginPage'
 import RegisterPage from './pages/auth/RegisterPage'
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import UserDashboardPage from './pages/dashboard/UserDashboardPage'
 import AdminDashboardPage from './pages/dashboard/AdminDashboardPage'
 import UserProfilePage from './pages/profile/UserProfilePage'
+import UserBookingsPage from './pages/bookings/UserBookingsPage'
 import CreateBookingPage from './pages/bookings/CreateBookingPage'
 import UnauthorizedPage from './pages/UnauthorizedPage'
 import Navbar from './components/layout/Navbar'
@@ -39,12 +41,14 @@ function App() {
           <Route element={<PublicOnlyRoute />}>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           </Route>
 
           <Route element={<ProtectedRoute />}>
             <Route element={<RoleRoute allowedRoles={['USER']} />}>
               <Route element={<UserDashboardLayout />}>
                 <Route path="/dashboard/user" element={<UserDashboardPage />} />
+                <Route path="/dashboard/user/bookings" element={<UserBookingsPage />} />
                 <Route path="/dashboard/user/bookings/create" element={<CreateBookingPage />} />
                 <Route path="/profile" element={<UserProfilePage />} />
               </Route>
