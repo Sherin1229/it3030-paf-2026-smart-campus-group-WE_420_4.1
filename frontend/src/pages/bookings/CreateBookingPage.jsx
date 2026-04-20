@@ -1,19 +1,15 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
+import MiniBookingCalendar from '../../components/bookings/MiniBookingCalendar'
+import { useAuth } from '../../context/AuthContext'
+
+const BOOKING_API_BASE_URL = 'http://localhost:8081/api/bookings'
 
 const CreateBookingPage = () => {
+  const location = useLocation()
   const navigate = useNavigate()
-  const [formData, setFormData] = useState({
-    resourceType: '',
-    resourceId: '',
-    date: '',
-    startTime: '',
-    endTime: '',
-    purpose: '',
-    attendees: '',
-  })
-
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { user } = useAuth()
+  const editingBooking = location.state?.booking || null
 
   const resources = [
     { id: '1', name: 'Main Lecture Hall', type: 'Hall', capacity: 200 },
@@ -22,22 +18,79 @@ const CreateBookingPage = () => {
     { id: '4', name: 'Digital Projector Pro', type: 'Equipment', capacity: 0 },
   ]
 
+  const [formData, setFormData] = useState({
+    resourceType: editingBooking ? resources.find((resource) => resource.name === editingBooking.resource)?.type || '' : '',
+    resourceId: editingBooking ? resources.find((resource) => resource.name === editingBooking.resource)?.id || '' : '',
+    date: editingBooking?.date || '',
+    startTime: editingBooking?.startTime || '',
+    endTime: editingBooking?.endTime || '',
+    purpose: editingBooking?.purpose || '',
+    attendees: editingBooking?.attendees || '',
+  })
+
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState('')
+
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = (e) => {
+  const handleDateSelect = (date) => {
+    setFormData((prev) => ({ ...prev, date }))
+  }
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    setSubmitError('')
+
+    const selectedResource = resources.find((resource) => resource.id === formData.resourceId)
+    if (!selectedResource) {
+      setSubmitError('Please select a valid resource.')
+      return
+    }
+
+    if (!user?.email) {
+      setSubmitError('Unable to identify the logged-in user. Please login again.')
+      return
+    }
+
     setIsSubmitting(true)
 
-    // Simulate API call
-    setTimeout(() => {
-      console.log('Booking Data Submitted:', formData)
+    const payload = {
+      requesterEmail: user.email,
+      resourceId: selectedResource.id,
+      resourceName: selectedResource.name,
+      resourceType: selectedResource.type,
+      date: formData.date,
+      startTime: formData.startTime,
+      endTime: formData.endTime,
+      purpose: formData.purpose,
+      attendees: formData.attendees ? Number(formData.attendees) : null,
+    }
+
+    try {
+      const response = await fetch(BOOKING_API_BASE_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+
+      const responseBody = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        throw new Error(responseBody?.message || 'Failed to submit booking request.')
+      }
+
+      console.log('Booking Data Submitted:', responseBody)
       setIsSubmitting(false)
-      alert('Booking request submitted successfully! Status: PENDING')
-      navigate('/dashboard/user')
-    }, 1500)
+      alert(editingBooking ? 'Booking changes submitted as a new pending request.' : 'Booking request submitted successfully! Status: PENDING')
+      navigate('/dashboard/user/bookings/my')
+    } catch (error) {
+      setIsSubmitting(false)
+      setSubmitError(error.message || 'Failed to submit booking request.')
+    }
   }
 
   return (
@@ -46,9 +99,13 @@ const CreateBookingPage = () => {
         <p className="inline-flex w-fit rounded-full border border-sky-400/30 bg-sky-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-sky-300">
           Booking Management
         </p>
-        <h1 className="text-3xl font-bold text-white sm:text-4xl">Request New Booking</h1>
+        <h1 className="text-3xl font-bold text-white sm:text-4xl">
+          {editingBooking ? 'Edit Booking Request' : 'Request New Booking'}
+        </h1>
         <p className="max-w-2xl text-slate-300">
-          Reserve campus facilities or equipment. Your request will be reviewed by the administration.
+          {editingBooking
+            ? 'Update the pending request before administration reviews it.'
+            : 'Reserve campus facilities or equipment. Your request will be reviewed by the administration.'}
         </p>
       </div>
 
@@ -175,6 +232,14 @@ const CreateBookingPage = () => {
             </div>
 
             <div className="flex items-center gap-4">
+              {submitError ? (
+                <p className="w-full rounded-xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm font-medium text-rose-300">
+                  {submitError}
+                </p>
+              ) : null}
+            </div>
+
+            <div className="flex items-center gap-4">
               <button
                 type="submit"
                 disabled={isSubmitting}
@@ -189,7 +254,7 @@ const CreateBookingPage = () => {
                     Processing...
                   </span>
                 ) : (
-                  'Submit Booking Request'
+                  editingBooking ? 'Update Booking Request' : 'Submit Booking Request'
                 )}
               </button>
               <button
@@ -231,7 +296,7 @@ const CreateBookingPage = () => {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+          <div className="space-y-4 rounded-2xl border border-white/10 bg-white/5 p-6">
             <h3 className="text-base font-semibold text-white italic">Campus Rules</h3>
             <ul className="mt-4 space-y-3 text-sm text-slate-400">
               <li className="flex gap-2">
@@ -247,6 +312,15 @@ const CreateBookingPage = () => {
                 Ensure all equipment is returned in its original condition.
               </li>
             </ul>
+
+            <div>
+              <MiniBookingCalendar
+                onDateSelect={handleDateSelect}
+                selectedDate={formData.date}
+                selectedResource={resources.find((r) => r.id === formData.resourceId)?.name}
+                resources={resources}
+              />
+            </div>
           </div>
         </div>
       </div>

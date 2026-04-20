@@ -8,6 +8,7 @@ import UserDashboardPage from './pages/dashboard/UserDashboardPage'
 import AdminDashboardPage from './pages/dashboard/AdminDashboardPage'
 import UserProfilePage from './pages/profile/UserProfilePage'
 import UserBookingsPage from './pages/bookings/UserBookingsPage'
+import MyBookingsPage from './pages/bookings/MyBookingsPage'
 import CreateBookingPage from './pages/bookings/CreateBookingPage'
 import AdminBookingsPage from './pages/bookings/AdminBookingsPage'
 import UnauthorizedPage from './pages/UnauthorizedPage'
@@ -50,6 +51,7 @@ function App() {
               <Route element={<UserDashboardLayout />}>
                 <Route path="/dashboard/user" element={<UserDashboardPage />} />
                 <Route path="/dashboard/user/bookings" element={<UserBookingsPage />} />
+                <Route path="/dashboard/user/bookings/my" element={<MyBookingsPage />} />
                 <Route path="/dashboard/user/bookings/create" element={<CreateBookingPage />} />
                 <Route path="/profile" element={<UserProfilePage />} />
               </Route>
