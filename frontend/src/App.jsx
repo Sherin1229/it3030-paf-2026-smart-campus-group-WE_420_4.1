@@ -16,6 +16,11 @@ import ProtectedRoute from './routes/ProtectedRoute'
 import RoleRoute from './routes/RoleRoute'
 import PublicOnlyRoute from './routes/PublicOnlyRoute'
 
+// ✅ Your imports - Module A
+import ResourceListPage from './pages/resources/ResourceListPage'
+import ResourceDetailPage from './pages/resources/ResourceDetailPage'
+import AdminResourcePanel from './pages/resources/AdminResourcePanel'
+
 function App() {
   const location = useLocation()
   const currentPath = location.pathname.toLowerCase()
@@ -35,6 +40,10 @@ function App() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
 
+          {/* ✅ Public resource routes - anyone can view */}
+          <Route path="/resources" element={<ResourceListPage />} />
+          <Route path="/resources/:id" element={<ResourceDetailPage />} />
+
           <Route element={<PublicOnlyRoute />}>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
@@ -47,9 +56,12 @@ function App() {
                 <Route path="/profile" element={<UserProfilePage />} />
               </Route>
             </Route>
+
             <Route element={<RoleRoute allowedRoles={['ADMIN']} />}>
               <Route element={<AdminDashboardLayout />}>
                 <Route path="/dashboard/admin" element={<AdminDashboardPage />} />
+                {/* ✅ Admin resource management - only admin can access */}
+                <Route path="/dashboard/admin/resources" element={<AdminResourcePanel />} />
               </Route>
             </Route>
           </Route>
