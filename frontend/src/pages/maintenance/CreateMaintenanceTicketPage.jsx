@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import UserDashboardLayout from '../../layouts/UserDashboardLayout'
 import CreateTicketForm from '../../components/maintenance/CreateTicketForm'
 
 const CreateMaintenanceTicketPage = () => {
@@ -42,34 +41,32 @@ const CreateMaintenanceTicketPage = () => {
   }
 
   return (
-    <UserDashboardLayout>
-      <div className="max-w-2xl mx-auto py-8 px-4">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Report an Issue</h1>
-          <p className="text-gray-400">Create a new maintenance ticket for a resource issue</p>
-        </div>
-
-        {/* Success Message */}
-        {successMessage && (
-          <div className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-emerald-300">
-            {successMessage}
-          </div>
-        )}
-
-        {/* Error Message */}
-        {errorMessage && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-red-300">
-            {errorMessage}
-          </div>
-        )}
-
-        {/* Form */}
-        {!successMessage && (
-          <CreateTicketForm onSubmit={handleSubmit} isLoading={isLoading} />
-        )}
+    <div className="max-w-2xl mx-auto py-8 px-4">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold text-white mb-2">Report an Issue</h1>
+        <p className="text-gray-400">Create a new maintenance ticket for a resource issue</p>
       </div>
-    </UserDashboardLayout>
+
+      {/* Success Message */}
+      {successMessage && (
+        <div className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-emerald-300">
+          {successMessage}
+        </div>
+      )}
+
+      {/* Error Message */}
+      {errorMessage && (
+        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-red-300">
+          {errorMessage}
+        </div>
+      )}
+
+      {/* Form */}
+      {!successMessage && (
+        <CreateTicketForm onSubmit={handleSubmit} isLoading={isLoading} />
+      )}
+    </div>
   )
 }
 
