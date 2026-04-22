@@ -39,6 +39,12 @@ public class UserAccount {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Column
+    private String otpCode;
+
+    @Column
+    private LocalDateTime otpExpiry;
+
     protected UserAccount() {
     }
 
@@ -80,5 +86,29 @@ public class UserAccount {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public String getOtpCode() {
+        return otpCode;
+    }
+
+    public void setOtpCode(String otpCode) {
+        this.otpCode = otpCode;
+    }
+
+    public LocalDateTime getOtpExpiry() {
+        return otpExpiry;
+    }
+
+    public void setOtpExpiry(LocalDateTime otpExpiry) {
+        this.otpExpiry = otpExpiry;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
     }
 }

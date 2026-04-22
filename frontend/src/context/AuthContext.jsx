@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 
 const AuthContext = createContext(null)
 const AUTH_STORAGE_KEY = 'smart-campus-auth'
-const API_BASE_URL = 'http://localhost:8080/api/auth'
+const API_BASE_URL = 'http://localhost:8081/api/auth'
 
 const roleHome = {
   USER: '/dashboard/user',
@@ -61,16 +61,22 @@ export const AuthProvider = ({ children }) => {
     return profile
   }
 
-  const loginWithGoogle = async () => {
-    const profile = {
-      name: 'Campus User',
-      email: 'user.google@campus.edu',
-      role: 'USER',
-      provider: 'GOOGLE',
-    }
-
+  const loginWithGoogle = async (idToken) => {
+    const profile = await sendAuthRequest('/google', { idToken })
     setUser(profile)
     return profile
+  }
+
+  const forgotPassword = async (email) => {
+    await sendAuthRequest('/forgot-password', { email })
+  }
+
+  const verifyOtp = async (email, otp) => {
+    await sendAuthRequest('/verify-otp', { email, otp })
+  }
+
+  const resetPassword = async (email, otp, newPassword) => {
+    await sendAuthRequest('/reset-password', { email, otp, newPassword })
   }
 
   const logout = () => setUser(null)
@@ -82,6 +88,9 @@ export const AuthProvider = ({ children }) => {
       login,
       register,
       loginWithGoogle,
+      forgotPassword,
+      verifyOtp,
+      resetPassword,
       logout,
       roleHome,
     }),

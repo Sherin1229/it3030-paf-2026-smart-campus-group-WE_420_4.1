@@ -1,8 +1,12 @@
 package com.example.backend.auth.controller;
 
 import com.example.backend.auth.dto.AuthResponse;
+import com.example.backend.auth.dto.ForgotPasswordRequest;
+import com.example.backend.auth.dto.GoogleLoginRequest;
 import com.example.backend.auth.dto.LoginRequest;
 import com.example.backend.auth.dto.RegisterRequest;
+import com.example.backend.auth.dto.ResetPasswordRequest;
+import com.example.backend.auth.dto.VerifyOtpRequest;
 import com.example.backend.auth.service.AuthService;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,5 +33,25 @@ public class AuthController {
     @PostMapping("/login")
     public AuthResponse login(@RequestBody LoginRequest request) {
         return authService.login(request);
+    }
+
+    @PostMapping("/google")
+    public AuthResponse googleLogin(@RequestBody GoogleLoginRequest request) {
+        return authService.loginWithGoogle(request);
+    }
+
+    @PostMapping("/forgot-password")
+    public void forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        authService.sendOtp(request);
+    }
+
+    @PostMapping("/verify-otp")
+    public void verifyOtp(@RequestBody VerifyOtpRequest request) {
+        authService.verifyOtp(request);
+    }
+
+    @PostMapping("/reset-password")
+    public void resetPassword(@RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
     }
 }

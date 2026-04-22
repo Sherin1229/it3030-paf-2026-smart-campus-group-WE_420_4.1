@@ -1,16 +1,29 @@
+import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { motion } from 'framer-motion'
 
 const UserDashboardPage = () => {
   const { user } = useAuth()
 
-  const quickActions = [
-    ['Request New Booking', 'Reserve labs, halls or equipment in a few clicks.'],
-    ['Track Pending Requests', 'Monitor approvals and responses for your submissions.'],
-    ['View Recent Activity', 'See what changed in your booking timeline.'],
+  const quickLinks = [
+    {
+      title: 'View Profile',
+      text: 'Update your personal details and preferences.',
+      link: '/profile',
+    },
+    {
+      title: 'Manage Bookings',
+      text: 'Head to the Bookings tab to request resources.',
+      link: '/dashboard/user/bookings',
+    },
   ]
 
   return (
-    <section>
+    <motion.section
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+    >
       <p className="inline-flex rounded-full border border-sky-400/30 bg-sky-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-sky-300">
         User Dashboard
       </p>
@@ -19,12 +32,18 @@ const UserDashboardPage = () => {
         Manage your own campus booking requests, track statuses, and keep your schedule organized.
       </p>
 
-      <div className="mt-6 grid gap-4 lg:grid-cols-3">
-        {quickActions.map(([title, text]) => (
-          <article key={title} className="rounded-2xl border border-sky-400/20 bg-sky-500/10 p-5">
-            <h2 className="text-base font-semibold text-white">{title}</h2>
-            <p className="mt-2 text-sm text-slate-300">{text}</p>
-          </article>
+      <div className="mt-6 grid gap-4 lg:grid-cols-2">
+        {quickLinks.map((action) => (
+          <Link
+            key={action.title}
+            to={action.link}
+            className="group rounded-2xl border border-indigo-400/20 bg-indigo-500/10 p-5 transition-all hover:border-indigo-500/50 hover:bg-indigo-500/20"
+          >
+            <h2 className="text-base font-semibold text-white group-hover:text-indigo-300 transition-colors">
+              {action.title}
+            </h2>
+            <p className="mt-2 text-sm text-slate-300">{action.text}</p>
+          </Link>
         ))}
       </div>
 
@@ -49,7 +68,7 @@ const UserDashboardPage = () => {
           </div>
         </div>
       </div>
-    </section>
+    </motion.section>
   )
 }
 
