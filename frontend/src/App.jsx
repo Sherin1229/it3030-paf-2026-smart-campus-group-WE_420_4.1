@@ -11,6 +11,9 @@ import UserBookingsPage from './pages/bookings/UserBookingsPage'
 import MyBookingsPage from './pages/bookings/MyBookingsPage'
 import CreateBookingPage from './pages/bookings/CreateBookingPage'
 import AdminBookingsPage from './pages/bookings/AdminBookingsPage'
+import CreateMaintenanceTicketPage from './pages/maintenance/CreateMaintenanceTicketPage'
+import MyMaintenanceTicketsPage from './pages/maintenance/MyMaintenanceTicketsPage'
+import AdminMaintenanceTicketsPage from './pages/maintenance/AdminMaintenanceTicketsPage'
 import UnauthorizedPage from './pages/UnauthorizedPage'
 import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
@@ -27,7 +30,8 @@ function App() {
   const isWorkspaceRoute =
     currentPath.startsWith('/dashboard/user') ||
     currentPath.startsWith('/dashboard/admin') ||
-    currentPath.startsWith('/profile')
+    currentPath.startsWith('/profile') ||
+    currentPath.startsWith('/maintenance')
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-x-hidden">
@@ -53,6 +57,8 @@ function App() {
                 <Route path="/dashboard/user/bookings" element={<UserBookingsPage />} />
                 <Route path="/dashboard/user/bookings/my" element={<MyBookingsPage />} />
                 <Route path="/dashboard/user/bookings/create" element={<CreateBookingPage />} />
+                <Route path="/dashboard/user/maintenance" element={<MyMaintenanceTicketsPage />} />
+                <Route path="/dashboard/user/maintenance/create" element={<CreateMaintenanceTicketPage />} />
                 <Route path="/profile" element={<UserProfilePage />} />
               </Route>
             </Route>
@@ -60,6 +66,7 @@ function App() {
               <Route element={<AdminDashboardLayout />}>
                 <Route path="/dashboard/admin" element={<AdminDashboardPage />} />
                 <Route path="/dashboard/admin/bookings" element={<AdminBookingsPage />} />
+                <Route path="/dashboard/admin/maintenance" element={<AdminMaintenanceTicketsPage />} />
               </Route>
             </Route>
           </Route>
