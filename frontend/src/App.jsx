@@ -16,10 +16,12 @@ import ProtectedRoute from './routes/ProtectedRoute'
 import RoleRoute from './routes/RoleRoute'
 import PublicOnlyRoute from './routes/PublicOnlyRoute'
 
-// ✅ Your imports - Module A
+
+//my imports - Module A
 import ResourceListPage from './pages/resources/ResourceListPage'
 import ResourceDetailPage from './pages/resources/ResourceDetailPage'
 import AdminResourcePanel from './pages/resources/AdminResourcePanel'
+import AdminAnalyticsPage from './pages/resources/AdminAnalyticsPage'
 
 function App() {
   const location = useLocation()
@@ -62,6 +64,7 @@ function App() {
                 <Route path="/dashboard/admin" element={<AdminDashboardPage />} />
                 {/* ✅ Admin resource management - only admin can access */}
                 <Route path="/dashboard/admin/resources" element={<AdminResourcePanel />} />
+                <Route path="/dashboard/admin/analytics" element={<AdminAnalyticsPage />} />
               </Route>
             </Route>
           </Route>
