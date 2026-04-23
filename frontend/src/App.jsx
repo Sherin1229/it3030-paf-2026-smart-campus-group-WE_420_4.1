@@ -6,6 +6,7 @@ import RegisterPage from './pages/auth/RegisterPage'
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import UserDashboardPage from './pages/dashboard/UserDashboardPage'
 import AdminDashboardPage from './pages/dashboard/AdminDashboardPage'
+import UserResourcesPage from './pages/resources/UserResourcesPage'
 import UserProfilePage from './pages/profile/UserProfilePage'
 import UserBookingsPage from './pages/bookings/UserBookingsPage'
 import MyBookingsPage from './pages/bookings/MyBookingsPage'
@@ -20,6 +21,14 @@ import { Route, Routes, useLocation } from 'react-router-dom'
 import ProtectedRoute from './routes/ProtectedRoute'
 import RoleRoute from './routes/RoleRoute'
 import PublicOnlyRoute from './routes/PublicOnlyRoute'
+
+
+//my imports - Module A
+import ResourceListPage from './pages/resources/ResourceListPage'
+import ResourceDetailPage from './pages/resources/ResourceDetailPage'
+import AdminResourcePanel from './pages/resources/AdminResourcePanel'
+import AdminCreateResourcePage from './pages/resources/AdminCreateResourcePage'
+import AdminAnalyticsPage from './pages/resources/AdminAnalyticsPage'
 
 function App() {
   const location = useLocation()
@@ -40,6 +49,10 @@ function App() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
 
+          {/* ✅ Public resource routes - anyone can view */}
+          <Route path="/resources" element={<ResourceListPage />} />
+          <Route path="/resources/:id" element={<ResourceDetailPage />} />
+
           <Route element={<PublicOnlyRoute />}>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
@@ -53,12 +66,19 @@ function App() {
                 <Route path="/dashboard/user/bookings" element={<UserBookingsPage />} />
                 <Route path="/dashboard/user/bookings/my" element={<MyBookingsPage />} />
                 <Route path="/dashboard/user/bookings/create" element={<CreateBookingPage />} />
+                <Route path="/dashboard/user/resources" element={<UserResourcesPage />} />
                 <Route path="/profile" element={<UserProfilePage />} />
               </Route>
             </Route>
+
             <Route element={<RoleRoute allowedRoles={['ADMIN']} />}>
               <Route element={<AdminDashboardLayout />}>
                 <Route path="/dashboard/admin" element={<AdminDashboardPage />} />
+                {/* ✅ Admin resource management - only admin can access */}
+                <Route path="/dashboard/admin/resources" element={<AdminResourcePanel />} />
+                <Route path="/dashboard/admin/resources/create" element={<AdminCreateResourcePage />} />
+                <Route path="/dashboard/admin/resources/edit/:id" element={<AdminCreateResourcePage />} />
+                <Route path="/dashboard/admin/analytics" element={<AdminAnalyticsPage />} />
                 <Route path="/dashboard/admin/bookings" element={<AdminBookingsPage />} />
               </Route>
             </Route>
