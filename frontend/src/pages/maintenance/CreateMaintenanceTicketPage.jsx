@@ -27,7 +27,8 @@ const CreateMaintenanceTicketPage = () => {
       }
 
       const data = await response.json()
-      setSuccessMessage(`Ticket #${data.ticketId} created successfully!`)
+      const createdTicketId = data?.ticketId ?? data?.id
+      setSuccessMessage(`Ticket #${createdTicketId} created successfully!`)
       
       setTimeout(() => {
         navigate('/dashboard/user/maintenance')

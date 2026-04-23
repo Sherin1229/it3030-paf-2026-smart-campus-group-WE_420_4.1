@@ -5,6 +5,11 @@ import TicketDetail from '../../components/maintenance/TicketDetail'
 import { Plus, AlertCircle } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 
+const normalizeTicket = (ticket) => ({
+  ...ticket,
+  ticketId: ticket?.ticketId ?? ticket?.id,
+})
+
 const MyMaintenanceTicketsPage = () => {
   const navigate = useNavigate()
   const { user } = useAuth()
@@ -14,8 +19,10 @@ const MyMaintenanceTicketsPage = () => {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    fetchTickets()
-  }, [])
+    if (user) {
+      fetchTickets()
+    }
+  }, [user])
 
   const fetchTickets = async () => {
     setIsLoading(true)
@@ -33,7 +40,7 @@ const MyMaintenanceTicketsPage = () => {
       }
 
       const data = await response.json()
-      setTickets(Array.isArray(data) ? data : [])
+      setTickets(Array.isArray(data) ? data.map(normalizeTicket) : [])
     } catch (err) {
       setError(err.message || 'Failed to load tickets')
       console.error('Error:', err)

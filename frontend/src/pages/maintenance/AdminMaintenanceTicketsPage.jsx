@@ -3,6 +3,11 @@ import TicketList from '../../components/maintenance/TicketList'
 import TicketDetail from '../../components/maintenance/TicketDetail'
 import { AlertCircle, RefreshCw } from 'lucide-react'
 
+const normalizeTicket = (ticket) => ({
+  ...ticket,
+  ticketId: ticket?.ticketId ?? ticket?.id,
+})
+
 const AdminMaintenanceTicketsPage = () => {
   const [tickets, setTickets] = useState([])
   const [selectedTicket, setSelectedTicket] = useState(null)
@@ -28,7 +33,7 @@ const AdminMaintenanceTicketsPage = () => {
       }
 
       const data = await response.json()
-      setTickets(Array.isArray(data) ? data : [])
+      setTickets(Array.isArray(data) ? data.map(normalizeTicket) : [])
     } catch (err) {
       setError(err.message || 'Failed to load tickets')
       console.error('Error:', err)

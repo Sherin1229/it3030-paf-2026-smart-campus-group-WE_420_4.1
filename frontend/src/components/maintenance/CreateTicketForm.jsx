@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Upload, X } from 'lucide-react'
+import { useAuth } from '../../context/AuthContext'
 
 const CATEGORIES = [
   'Electrical Issue',
@@ -16,6 +17,7 @@ const CATEGORIES = [
 const PRIORITIES = ['Low', 'Medium', 'High', 'Critical']
 
 const CreateTicketForm = ({ onSubmit, isLoading }) => {
+  const { user } = useAuth()
   const [formData, setFormData] = useState({
     resourceName: '',
     resourceLocation: '',
@@ -26,6 +28,17 @@ const CreateTicketForm = ({ onSubmit, isLoading }) => {
     contactEmail: '',
     contactPhone: '',
   })
+
+  // Auto-populate form with authenticated user data
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        contactEmail: user.email || '',
+        contactName: user.name || '',
+      }))
+    }
+  }, [user])
   const [images, setImages] = useState([])
   const [imagePreviewUrls, setImagePreviewUrls] = useState([])
   const [errors, setErrors] = useState({})
@@ -82,6 +95,10 @@ const CreateTicketForm = ({ onSubmit, isLoading }) => {
 
     const submitData = new FormData()
     Object.keys(formData).forEach(key => {
+      if (key === 'contactEmail' && user?.email) {
+        submitData.append(key, user.email)
+        return
+      }
       submitData.append(key, formData[key])
     })
     images.forEach((image, index) => {
@@ -206,9 +223,11 @@ const CreateTicketForm = ({ onSubmit, isLoading }) => {
               name="contactEmail"
               value={formData.contactEmail}
               onChange={handleChange}
+              readOnly={Boolean(user?.email)}
               placeholder="your.email@example.com"
               className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition"
             />
+            {user?.email && <p className="text-xs text-gray-500 mt-1">Email is taken from your signed-in account.</p>}
             {errors.contactEmail && <p className="text-red-400 text-sm mt-1">{errors.contactEmail}</p>}
           </div>
 
