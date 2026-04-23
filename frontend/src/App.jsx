@@ -6,6 +6,7 @@ import RegisterPage from './pages/auth/RegisterPage'
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import UserDashboardPage from './pages/dashboard/UserDashboardPage'
 import AdminDashboardPage from './pages/dashboard/AdminDashboardPage'
+import UserResourcesPage from './pages/resources/UserResourcesPage'
 import UserProfilePage from './pages/profile/UserProfilePage'
 import UserBookingsPage from './pages/bookings/UserBookingsPage'
 import MyBookingsPage from './pages/bookings/MyBookingsPage'
@@ -26,6 +27,7 @@ import PublicOnlyRoute from './routes/PublicOnlyRoute'
 import ResourceListPage from './pages/resources/ResourceListPage'
 import ResourceDetailPage from './pages/resources/ResourceDetailPage'
 import AdminResourcePanel from './pages/resources/AdminResourcePanel'
+import AdminCreateResourcePage from './pages/resources/AdminCreateResourcePage'
 import AdminAnalyticsPage from './pages/resources/AdminAnalyticsPage'
 
 function App() {
@@ -64,6 +66,7 @@ function App() {
                 <Route path="/dashboard/user/bookings" element={<UserBookingsPage />} />
                 <Route path="/dashboard/user/bookings/my" element={<MyBookingsPage />} />
                 <Route path="/dashboard/user/bookings/create" element={<CreateBookingPage />} />
+                <Route path="/dashboard/user/resources" element={<UserResourcesPage />} />
                 <Route path="/profile" element={<UserProfilePage />} />
               </Route>
             </Route>
@@ -73,6 +76,8 @@ function App() {
                 <Route path="/dashboard/admin" element={<AdminDashboardPage />} />
                 {/* ✅ Admin resource management - only admin can access */}
                 <Route path="/dashboard/admin/resources" element={<AdminResourcePanel />} />
+                <Route path="/dashboard/admin/resources/create" element={<AdminCreateResourcePage />} />
+                <Route path="/dashboard/admin/resources/edit/:id" element={<AdminCreateResourcePage />} />
                 <Route path="/dashboard/admin/analytics" element={<AdminAnalyticsPage />} />
                 <Route path="/dashboard/admin/bookings" element={<AdminBookingsPage />} />
               </Route>
