@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import MiniBookingCalendar from '../../components/bookings/MiniBookingCalendar'
 import { useAuth } from '../../context/AuthContext'
 
-const BOOKING_API_BASE_URL = 'http://localhost:8081/api/bookings'
+const BOOKING_API_BASE_URL = 'http://localhost:8080/api/bookings'
 
 const CreateBookingPage = () => {
   const location = useLocation()

@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 const AdminDashboardLayout = () => {
   const location = useLocation()
   const navigate = useNavigate()
-  const location = useLocation()
+
   const { user, logout } = useAuth()
 
   const handleLogout = () => {
