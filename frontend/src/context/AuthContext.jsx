@@ -79,6 +79,28 @@ export const AuthProvider = ({ children }) => {
     await sendAuthRequest('/reset-password', { email, otp, newPassword })
   }
 
+  const updateProfile = async (email, { name, bio }) => {
+    const response = await fetch(`${API_BASE_URL}/update-profile?email=${email}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name, bio }),
+    })
+
+    const responseBody = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      throw new Error(responseBody?.message || 'Profile update failed.')
+    }
+
+    setUser(responseBody)
+    return responseBody
+  }
+
+  const changePassword = async (email, currentPassword, newPassword) => {
+    await sendAuthRequest('/change-password', { email, currentPassword, newPassword })
+  }
+
   const logout = () => setUser(null)
 
   const value = useMemo(
@@ -91,6 +113,8 @@ export const AuthProvider = ({ children }) => {
       forgotPassword,
       verifyOtp,
       resetPassword,
+      updateProfile,
+      changePassword,
       logout,
       roleHome,
     }),

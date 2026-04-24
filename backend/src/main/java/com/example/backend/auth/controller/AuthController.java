@@ -54,4 +54,14 @@ public class AuthController {
     public void resetPassword(@RequestBody ResetPasswordRequest request) {
         authService.resetPassword(request);
     }
+
+    @PostMapping("/update-profile")
+    public AuthResponse updateProfile(@org.springframework.web.bind.annotation.RequestParam String email, @RequestBody com.example.backend.auth.dto.UpdateProfileRequest request) {
+        return authService.updateProfile(email, request);
+    }
+
+    @PostMapping("/change-password")
+    public void changePassword(@RequestBody com.example.backend.auth.dto.ChangePasswordRequest request) {
+        authService.changePassword(request);
+    }
 }
