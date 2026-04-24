@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
@@ -10,23 +10,60 @@ const STATUS_COLORS = {
   Rejected: { bg: 'bg-rose-500/10 text-rose-300 ring-rose-500/20', dot: 'bg-rose-400' },
 }
 
-const initialBookings = [
-  { id: 'REQ-001', user: 'John Doe',    resource: 'Lab A',     date: '2026-04-25', status: 'Pending'  },
-  { id: 'REQ-002', user: 'Jane Smith',  resource: 'Main Hall', date: '2026-04-26', status: 'Pending'  },
-  { id: 'REQ-003', user: 'Ali Hassan',  resource: 'Lab B',     date: '2026-04-20', status: 'Approved' },
-  { id: 'REQ-004', user: 'Sara Khan',   resource: 'Auditorium',date: '2026-04-18', status: 'Rejected' },
-]
+const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://10.50.20.47:8081/api'}/bookings`
 
 const AdminBookingsPage = () => {
-  const [bookings, setBookings] = useState(initialBookings)
+  const [bookings, setBookings] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [filter, setFilter]   = useState('All')
   const [exporting, setExporting] = useState(false)
   const [viewMode, setViewMode] = useState('table') // 'table' | 'calendar'
 
+  useEffect(() => {
+    fetchBookings()
+  }, [])
+
+  const fetchBookings = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch(API_BASE_URL)
+      if (!response.ok) throw new Error('Failed to fetch bookings')
+      const data = await response.json()
+      
+      // Map backend fields to UI expected fields
+      const mapped = data.map(b => ({
+        id: b.id,
+        bookingCode: b.bookingCode,
+        user: b.requesterEmail,
+        resource: b.resourceName,
+        date: b.date,
+        status: b.status.charAt(0).toUpperCase() + b.status.slice(1).toLowerCase()
+      }))
+      setBookings(mapped)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const filtered = filter === 'All' ? bookings : bookings.filter(b => b.status === filter)
 
-  const updateStatus = (id, status) =>
-    setBookings(prev => prev.map(b => b.id === id ? { ...b, status } : b))
+  const updateStatus = async (id, newStatus) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/${id}/status?status=${newStatus}`, {
+        method: 'PATCH'
+      })
+      if (!response.ok) throw new Error('Failed to update status')
+      
+      setBookings(prev => prev.map(b => 
+        b.id === id ? { ...b, status: newStatus } : b
+      ))
+    } catch (err) {
+      alert(`Error: ${err.message}`)
+    }
+  }
 
   const exportPdf = () => {
     setExporting(true)
@@ -203,7 +240,7 @@ const AdminBookingsPage = () => {
       </div>
 
       {/* Table */}
-      <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-6">
+      <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-6 min-h-[400px]">
         <div className="flex items-center justify-between border-b border-white/5 pb-4">
           <h2 className="text-lg font-semibold text-white">
             {filter === 'All' ? 'All Requests' : `${filter} Requests`}
@@ -216,8 +253,22 @@ const AdminBookingsPage = () => {
         </div>
 
         <div className="mt-4">
-          {filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-700 py-12 text-center">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <div className="h-10 w-10 animate-spin rounded-full border-2 border-emerald-400 border-t-transparent" />
+              <p className="mt-4 text-sm text-slate-400">Loading campus bookings...</p>
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="rounded-full bg-rose-500/10 p-3 text-rose-400">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+              </div>
+              <h3 className="mt-4 text-sm font-semibold text-white">Failed to load bookings</h3>
+              <p className="mt-1 text-xs text-slate-400">{error}</p>
+              <button onClick={fetchBookings} className="mt-4 text-xs font-bold text-emerald-400 hover:underline">Try Again</button>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-800 text-slate-400">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
               </div>
@@ -242,7 +293,7 @@ const AdminBookingsPage = () => {
                     const color = STATUS_COLORS[req.status]
                     return (
                       <tr key={req.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                        <td className="px-4 py-4 font-medium text-white">{req.id}</td>
+                        <td className="px-4 py-4 font-medium text-white">{req.bookingCode}</td>
                         <td className="px-4 py-4">{req.user}</td>
                         <td className="px-4 py-4">{req.resource}</td>
                         <td className="px-4 py-4">{req.date}</td>

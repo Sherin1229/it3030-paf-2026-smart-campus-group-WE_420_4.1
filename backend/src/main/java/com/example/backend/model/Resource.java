@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "resources")
@@ -13,8 +14,8 @@ import lombok.NoArgsConstructor;
 public class Resource {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private String name;
 
@@ -25,10 +26,22 @@ public class Resource {
 
     private String location;
 
-    private String availabilityWindows;
+    @Column(name = "availability_window")
+    private String availabilityWindow;
 
     @Enumerated(EnumType.STRING)
     private ResourceStatus status = ResourceStatus.ACTIVE;
 
+    @Column(length = 1000)
     private String description;
+
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+    }
 }

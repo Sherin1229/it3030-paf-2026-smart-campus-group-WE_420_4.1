@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.Locale;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -20,6 +22,38 @@ public class BookingService {
 
     public BookingService(BookingRequestRepository bookingRequestRepository) {
         this.bookingRequestRepository = bookingRequestRepository;
+    }
+
+    public List<BookingResponse> getUserBookings(String email) {
+        return bookingRequestRepository.findByRequesterEmailOrderByCreatedAtDesc(email.toLowerCase(Locale.ROOT))
+                .stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public BookingResponse verifyBooking(String code) {
+        try {
+            Long id = Long.parseLong(code.replace("BK-", ""));
+            return bookingRequestRepository.findById(id)
+                    .map(this::toResponse)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking pass invalid."));
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid pass format.");
+        }
+    }
+
+    public List<BookingResponse> getAllBookings() {
+        return bookingRequestRepository.findAll()
+                .stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public BookingResponse updateBookingStatus(Long id, String status) {
+        BookingRequest booking = bookingRequestRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found."));
+        booking.setStatus(status.toUpperCase(Locale.ROOT));
+        return toResponse(bookingRequestRepository.save(booking));
     }
 
     public BookingResponse createBooking(CreateBookingRequest request) {

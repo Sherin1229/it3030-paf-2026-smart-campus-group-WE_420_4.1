@@ -1,8 +1,9 @@
 package com.example.backend.model;
 
 public enum ResourceType {
-    LECTURE_HALL,
+    EQUIPMENT,
     LAB,
-    MEETING_ROOM,
-    EQUIPMENT
+    ROOM,
+    LECTURE_HALL,
+    MEETING_ROOM
 }

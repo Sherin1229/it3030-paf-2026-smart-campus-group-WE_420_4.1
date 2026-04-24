@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 
 const AuthContext = createContext(null)
 const AUTH_STORAGE_KEY = 'smart-campus-auth'
-const API_BASE_URL = 'http://localhost:8080/api/auth'
+const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://10.50.20.47:8081/api'}/auth`
 
 const roleHome = {
   USER: '/dashboard/user',
