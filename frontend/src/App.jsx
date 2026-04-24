@@ -12,6 +12,7 @@ import UserBookingsPage from './pages/bookings/UserBookingsPage'
 import MyBookingsPage from './pages/bookings/MyBookingsPage'
 import CreateBookingPage from './pages/bookings/CreateBookingPage'
 import AdminBookingsPage from './pages/bookings/AdminBookingsPage'
+import VerifyBookingPage from './pages/bookings/VerifyBookingPage'
 import UnauthorizedPage from './pages/UnauthorizedPage'
 import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
@@ -36,7 +37,8 @@ function App() {
   const isWorkspaceRoute =
     currentPath.startsWith('/dashboard/user') ||
     currentPath.startsWith('/dashboard/admin') ||
-    currentPath.startsWith('/profile')
+    currentPath.startsWith('/profile') ||
+    currentPath.startsWith('/verify-booking')
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-x-hidden">
@@ -84,6 +86,7 @@ function App() {
             </Route>
           </Route>
 
+          <Route path="/verify-booking" element={<VerifyBookingPage />} />
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
           <Route path="*" element={<HomePage />} />
         </Routes>

@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../../context/AuthContext'
+import { QRCodeSVG } from 'qrcode.react'
 
 const STATUS_COLORS = {
   PENDING:  { bg: 'bg-amber-500/10 text-amber-300 ring-amber-500/20',  dot: 'bg-amber-400' },
@@ -9,23 +10,42 @@ const STATUS_COLORS = {
   REJECTED: { bg: 'bg-rose-500/10 text-rose-300 ring-rose-500/20', dot: 'bg-rose-400' },
 }
 
-const sampleBookings = [
-  { id: 'BK-1001', resource: 'Main Lecture Hall', date: '2026-04-25', startTime: '09:00', endTime: '11:00', purpose: 'Guest lecture on Quantum Computing', status: 'PENDING', createdAt: '2026-04-20' },
-  { id: 'BK-1002', resource: 'Advanced AI Lab',   date: '2026-04-22', startTime: '14:00', endTime: '16:00', purpose: 'ML Project Demo',                  status: 'APPROVED', createdAt: '2026-04-18' },
-  { id: 'BK-1003', resource: 'Conference Room A', date: '2026-04-20', startTime: '10:00', endTime: '11:30', purpose: 'Team standup meeting',              status: 'APPROVED', createdAt: '2026-04-17' },
-  { id: 'BK-1004', resource: 'Digital Projector Pro', date: '2026-04-18', startTime: '13:00', endTime: '15:00', purpose: 'Workshop presentation', status: 'REJECTED', createdAt: '2026-04-15' },
-]
+const BOOKING_API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://10.50.20.47:8081/api'}/bookings`
 
 const MyBookingsPage = () => {
   const { user } = useAuth()
-  const [bookings] = useState(sampleBookings)
+  const [bookings, setBookings] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [filter, setFilter] = useState('ALL')
   const [expandedId, setExpandedId] = useState(null)
+
+  useEffect(() => {
+    const fetchBookings = async () => {
+      if (!user?.email) return
+      
+      try {
+        setLoading(true)
+        const response = await fetch(`${BOOKING_API_BASE_URL}/my?email=${encodeURIComponent(user.email)}`)
+        if (!response.ok) throw new Error('Failed to fetch bookings')
+        const data = await response.json()
+        setBookings(data)
+      } catch (err) {
+        setError(err.message || 'Something went wrong while loading your bookings.')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchBookings()
+  }, [user?.email])
 
   const filtered = filter === 'ALL' ? bookings : bookings.filter(b => b.status === filter)
 
   const counts = { PENDING: 0, APPROVED: 0, REJECTED: 0 }
-  bookings.forEach(b => counts[b.status]++)
+  bookings.forEach(b => {
+    if (counts[b.status] !== undefined) counts[b.status]++
+  })
 
   return (
     <motion.section
@@ -84,7 +104,25 @@ const MyBookingsPage = () => {
 
       {/* Bookings List */}
       <div className="mt-4 space-y-3">
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-white/5 bg-white/5 py-16 text-center">
+            <svg className="h-8 w-8 animate-spin text-sky-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p className="mt-4 text-sm text-slate-400 font-medium">Fetching your reservations...</p>
+          </div>
+        ) : error ? (
+          <div className="rounded-2xl border border-rose-400/30 bg-rose-500/10 p-6 text-center">
+            <p className="text-sm font-medium text-rose-300">{error}</p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="mt-4 text-xs font-bold text-white underline underline-offset-4"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-700 py-16 text-center">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-800 text-slate-400">
               <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
@@ -124,7 +162,7 @@ const MyBookingsPage = () => {
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 flex-wrap">
-                      <h3 className="text-sm font-semibold text-white">{booking.resource}</h3>
+                      <h3 className="text-sm font-semibold text-white">{booking.resourceName}</h3>
                       <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ring-1 ${color.bg}`}>
                         {booking.status}
                       </span>
@@ -157,11 +195,13 @@ const MyBookingsPage = () => {
                         <div className="grid gap-4 sm:grid-cols-2">
                           <div>
                             <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Booking ID</p>
-                            <p className="mt-1 text-sm font-medium text-white">{booking.id}</p>
+                            <p className="mt-1 text-sm font-medium text-white">{booking.bookingCode}</p>
                           </div>
                           <div>
                             <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Created</p>
-                            <p className="mt-1 text-sm font-medium text-white">{booking.createdAt}</p>
+                            <p className="mt-1 text-sm font-medium text-white">
+                              {booking.createdAt ? new Date(booking.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : '---'}
+                            </p>
                           </div>
                           <div className="sm:col-span-2">
                             <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Purpose</p>
@@ -169,8 +209,38 @@ const MyBookingsPage = () => {
                           </div>
                         </div>
 
+                        {/* QR Code Section */}
+                        <div className="mt-6 flex flex-col items-center justify-center rounded-2xl bg-white/5 p-6 border border-white/5 sm:flex-row sm:justify-start sm:gap-6">
+                          <div className="rounded-xl bg-white p-3 shadow-xl shadow-sky-500/10">
+                            <QRCodeSVG 
+                              value={`http://10.50.20.47:5173/verify-booking?code=${booking.bookingCode}`}
+                              size={100}
+                              level="H"
+                              includeMargin={false}
+                              imageSettings={{
+                                src: "/logo.png",
+                                x: undefined,
+                                y: undefined,
+                                height: 20,
+                                width: 20,
+                                excavate: true,
+                              }}
+                            />
+                          </div>
+                          <div className="mt-4 text-center sm:mt-0 sm:text-left">
+                            <h4 className="text-sm font-bold text-white">Digital Pass</h4>
+                            <p className="mt-1 text-xs text-slate-400 max-w-[200px]">
+                              Show this QR code at the {booking.resourceName} entrance for quick verification.
+                            </p>
+                            <div className="mt-3 flex items-center gap-2 text-[10px] font-medium text-sky-400">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                              Verified Secure
+                            </div>
+                          </div>
+                        </div>
+
                         {booking.status === 'PENDING' && (
-                          <div className="mt-4 flex flex-wrap gap-3">
+                          <div className="mt-6 flex flex-wrap gap-3">
                             <Link
                               to="/dashboard/user/bookings/create"
                               state={{ booking }}

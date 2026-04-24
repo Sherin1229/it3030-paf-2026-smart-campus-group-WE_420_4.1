@@ -16,7 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/resources")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = {"http://localhost:5173", "http://127.0.0.1:5173", "http://10.50.20.47:5173", "http://10.199.20.47:5173"})
 public class ResourceController {
 
     private final ResourceService resourceService;
@@ -39,7 +39,7 @@ public class ResourceController {
 
     // GET single resource by ID
     @GetMapping("/{id}")
-    public ResponseEntity<Resource> getResourceById(@PathVariable String id) {
+    public ResponseEntity<Resource> getResourceById(@PathVariable Long id) {
         return resourceService.getResourceById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -55,7 +55,7 @@ public class ResourceController {
     // PUT update resource (Admin)
     @PutMapping("/{id}")
     public ResponseEntity<Resource> updateResource(
-            @PathVariable String id,
+            @PathVariable Long id,
             @Valid @RequestBody ResourceDTO dto) {
         return resourceService.updateResource(id, dto)
                 .map(ResponseEntity::ok)
@@ -65,7 +65,7 @@ public class ResourceController {
     // PATCH update status only (Admin)
     @PatchMapping("/{id}/status")
     public ResponseEntity<Resource> updateStatus(
-            @PathVariable String id,
+            @PathVariable Long id,
             @RequestParam ResourceStatus status) {
         return resourceService.updateStatus(id, status)
                 .map(ResponseEntity::ok)
@@ -74,7 +74,7 @@ public class ResourceController {
 
     // DELETE resource (Admin)
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteResource(@PathVariable String id) {
+    public ResponseEntity<Void> deleteResource(@PathVariable Long id) {
         if (resourceService.deleteResource(id)) {
             return ResponseEntity.noContent().build();
         }

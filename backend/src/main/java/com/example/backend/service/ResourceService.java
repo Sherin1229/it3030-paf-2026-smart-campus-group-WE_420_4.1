@@ -23,7 +23,7 @@ public class ResourceService {
     }
 
     // Get resource by ID
-    public Optional<Resource> getResourceById(String id) {
+    public Optional<Resource> getResourceById(Long id) {
         return resourceRepository.findById(id);
     }
 
@@ -54,20 +54,20 @@ public class ResourceService {
         resource.setType(dto.getType());
         resource.setCapacity(dto.getCapacity());
         resource.setLocation(dto.getLocation());
-        resource.setAvailabilityWindows(dto.getAvailabilityWindows());
+        resource.setAvailabilityWindow(dto.getAvailabilityWindows());
         resource.setStatus(dto.getStatus() != null ? dto.getStatus() : ResourceStatus.ACTIVE);
         resource.setDescription(dto.getDescription());
         return resourceRepository.save(resource);
     }
 
     // Update resource (Admin)
-    public Optional<Resource> updateResource(String id, ResourceDTO dto) {
+    public Optional<Resource> updateResource(Long id, ResourceDTO dto) {
         return resourceRepository.findById(id).map(resource -> {
             resource.setName(dto.getName());
             resource.setType(dto.getType());
             resource.setCapacity(dto.getCapacity());
             resource.setLocation(dto.getLocation());
-            resource.setAvailabilityWindows(dto.getAvailabilityWindows());
+            resource.setAvailabilityWindow(dto.getAvailabilityWindows());
             resource.setStatus(dto.getStatus());
             resource.setDescription(dto.getDescription());
             return resourceRepository.save(resource);
@@ -75,7 +75,7 @@ public class ResourceService {
     }
 
     // Update status only (Admin)
-    public Optional<Resource> updateStatus(String id, ResourceStatus status) {
+    public Optional<Resource> updateStatus(Long id, ResourceStatus status) {
         return resourceRepository.findById(id).map(resource -> {
             resource.setStatus(status);
             return resourceRepository.save(resource);
@@ -83,7 +83,7 @@ public class ResourceService {
     }
 
     // Delete resource (Admin)
-    public boolean deleteResource(String id) {
+    public boolean deleteResource(Long id) {
         if (resourceRepository.existsById(id)) {
             resourceRepository.deleteById(id);
             return true;
