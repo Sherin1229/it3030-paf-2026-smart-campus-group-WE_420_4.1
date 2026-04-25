@@ -1,120 +1,107 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import HomePage from './pages/HomePage'
+import AboutPage from './pages/AboutPage'
+import ContactPage from './pages/ContactPage'
+import LoginPage from './pages/auth/LoginPage'
+import RegisterPage from './pages/auth/RegisterPage'
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
+import UserDashboardPage from './pages/dashboard/UserDashboardPage'
+import AdminDashboardPage from './pages/dashboard/AdminDashboardPage'
+import UserResourcesPage from './pages/resources/UserResourcesPage'
+import UserProfilePage from './pages/profile/UserProfilePage'
+import UserBookingsPage from './pages/bookings/UserBookingsPage'
+import MyBookingsPage from './pages/bookings/MyBookingsPage'
+import CreateBookingPage from './pages/bookings/CreateBookingPage'
+import QRScannerPage from './pages/bookings/QRScannerPage'
+import AdminBookingsPage from './pages/bookings/AdminBookingsPage'
+import CreateMaintenanceTicketPage from './pages/maintenance/CreateMaintenanceTicketPage'
+import MyMaintenanceTicketsPage from './pages/maintenance/MyMaintenanceTicketsPage'
+import AdminMaintenanceTicketsPage from './pages/maintenance/AdminMaintenanceTicketsPage'
+import VerifyBookingPage from './pages/bookings/VerifyBookingPage'
+import UnauthorizedPage from './pages/UnauthorizedPage'
+import Navbar from './components/layout/Navbar'
+import Footer from './components/layout/Footer'
+import UserDashboardLayout from './layouts/UserDashboardLayout'
+import AdminDashboardLayout from './layouts/AdminDashboardLayout'
+import { Route, Routes, useLocation } from 'react-router-dom'
+import ProtectedRoute from './routes/ProtectedRoute'
+import RoleRoute from './routes/RoleRoute'
+import PublicOnlyRoute from './routes/PublicOnlyRoute'
+
+
+//my imports - Module A
+import ResourceListPage from './pages/resources/ResourceListPage'
+import ResourceDetailPage from './pages/resources/ResourceDetailPage'
+import AdminResourcePanel from './pages/resources/AdminResourcePanel'
+import AdminCreateResourcePage from './pages/resources/AdminCreateResourcePage'
+import AdminAnalyticsPage from './pages/resources/AdminAnalyticsPage'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const location = useLocation()
+  const currentPath = location.pathname.toLowerCase()
+  const isWorkspaceRoute =
+    currentPath.startsWith('/dashboard/user') ||
+    currentPath.startsWith('/dashboard/admin') ||
+    currentPath.startsWith('/profile') ||
+    currentPath.startsWith('/maintenance')
+    currentPath.startsWith('/verify-booking')
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="relative flex min-h-screen flex-col overflow-x-hidden">
+      <div className="pointer-events-none fixed -left-40 -top-40 h-[34rem] w-[34rem] rounded-full bg-blue-700/25 blur-3xl" />
+      <div className="pointer-events-none fixed -bottom-44 -right-40 h-[34rem] w-[34rem] rounded-full bg-emerald-500/20 blur-3xl" />
+      {!isWorkspaceRoute ? <Navbar currentPath={currentPath} /> : null}
+      <main className="relative z-10 flex flex-1 flex-col">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/contact" element={<ContactPage />} />
 
-      <div className="ticks"></div>
+          {/* ✅ Public resource routes - anyone can view */}
+          <Route path="/resources" element={<ResourceListPage />} />
+          <Route path="/resources/:id" element={<ResourceDetailPage />} />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+          <Route element={<PublicOnlyRoute />}>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          </Route>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+          <Route element={<ProtectedRoute />}>
+            <Route element={<RoleRoute allowedRoles={['USER']} />}>
+              <Route element={<UserDashboardLayout />}>
+                <Route path="/dashboard/user" element={<UserDashboardPage />} />
+                <Route path="/dashboard/user/bookings" element={<UserBookingsPage />} />
+                <Route path="/dashboard/user/bookings/my" element={<MyBookingsPage />} />
+                <Route path="/dashboard/user/bookings/create" element={<CreateBookingPage />} />
+                <Route path="/dashboard/user/maintenance" element={<MyMaintenanceTicketsPage />} />
+                <Route path="/dashboard/user/maintenance/create" element={<CreateMaintenanceTicketPage />} />
+                <Route path="/dashboard/user/bookings/scan" element={<QRScannerPage />} />
+                <Route path="/dashboard/user/resources" element={<UserResourcesPage />} />
+                <Route path="/profile" element={<UserProfilePage />} />
+              </Route>
+            </Route>
+
+            <Route element={<RoleRoute allowedRoles={['ADMIN']} />}>
+              <Route element={<AdminDashboardLayout />}>
+                <Route path="/dashboard/admin" element={<AdminDashboardPage />} />
+                {/* ✅ Admin resource management - only admin can access */}
+                <Route path="/dashboard/admin/resources" element={<AdminResourcePanel />} />
+                <Route path="/dashboard/admin/resources/create" element={<AdminCreateResourcePage />} />
+                <Route path="/dashboard/admin/resources/edit/:id" element={<AdminCreateResourcePage />} />
+                <Route path="/dashboard/admin/analytics" element={<AdminAnalyticsPage />} />
+                <Route path="/dashboard/admin/bookings" element={<AdminBookingsPage />} />
+                <Route path="/dashboard/admin/maintenance" element={<AdminMaintenanceTicketsPage />} />
+              </Route>
+            </Route>
+          </Route>
+
+          <Route path="/verify-booking" element={<VerifyBookingPage />} />
+          <Route path="/unauthorized" element={<UnauthorizedPage />} />
+          <Route path="*" element={<HomePage />} />
+        </Routes>
+      </main>
+      {!isWorkspaceRoute ? <Footer /> : null}
+    </div>
   )
 }
 
