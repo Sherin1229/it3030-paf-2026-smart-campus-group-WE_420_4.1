@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { motion } from 'framer-motion'
 
@@ -19,11 +20,30 @@ const StatCard = ({ label, value, icon, color, delay }) => (
 
 const AdminDashboardPage = () => {
   const { user } = useAuth()
+  const [statsData, setStatsData] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081/api'}/dashboard/admin/stats`)
+        if (response.ok) {
+          const data = await response.json()
+          setStatsData(data)
+        }
+      } catch (error) {
+        console.error('Failed to fetch admin stats:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchStats()
+  }, [])
 
   const stats = [
     {
       label: 'Pending Approvals',
-      value: '12',
+      value: statsData?.pendingApprovals ?? '0',
       color: 'border-amber-400/20',
       delay: 0.1,
       icon: (
@@ -32,7 +52,7 @@ const AdminDashboardPage = () => {
     },
     {
       label: 'Active Resources',
-      value: '34',
+      value: statsData?.activeResources ?? '0',
       color: 'border-emerald-400/20',
       delay: 0.2,
       icon: (
@@ -41,7 +61,7 @@ const AdminDashboardPage = () => {
     },
     {
       label: 'Conflict Flags',
-      value: '3',
+      value: statsData?.conflictFlags ?? '0',
       color: 'border-rose-400/20',
       delay: 0.3,
       icon: (
@@ -50,7 +70,7 @@ const AdminDashboardPage = () => {
     },
     {
       label: 'Approved Today',
-      value: '28',
+      value: statsData?.approvedToday ?? '0',
       color: 'border-sky-400/20',
       delay: 0.4,
       icon: (
@@ -92,18 +112,48 @@ const AdminDashboardPage = () => {
           </Link>
         </div>
 
-        <div className="mt-4 flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-700 py-12 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-800 text-slate-400">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-          </div>
-          <h3 className="mt-4 text-sm font-semibold text-slate-200">Backend not yet connected</h3>
-          <p className="mt-1 max-w-sm text-xs text-slate-400">Once booking endpoints are live, the queue will be populated here in real-time.</p>
-          <Link
-            to="/dashboard/admin/bookings"
-            className="mt-4 rounded-lg bg-emerald-500/20 px-4 py-2 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/30 transition-colors"
-          >
-            Go to Manage Bookings
-          </Link>
+        <div className="mt-4 overflow-hidden rounded-xl border border-white/10 bg-white/5">
+          {!statsData?.approvalQueue || statsData.approvalQueue.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-800 text-slate-400">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+              </div>
+              <h3 className="mt-4 text-sm font-semibold text-slate-200">No pending approvals</h3>
+              <p className="mt-1 max-w-sm text-xs text-slate-400">Everything is caught up! New requests will appear here as they come in.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-white/10 bg-white/5 text-slate-400">
+                    <th className="px-6 py-4 font-medium">Resource</th>
+                    <th className="px-6 py-4 font-medium">Requester</th>
+                    <th className="px-6 py-4 font-medium">Date</th>
+                    <th className="px-6 py-4 font-medium">Time</th>
+                    <th className="px-6 py-4 font-medium">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {statsData.approvalQueue.map((item) => (
+                    <tr key={item.id} className="transition-colors hover:bg-white/5">
+                      <td className="px-6 py-4 font-medium text-white">{item.resourceName}</td>
+                      <td className="px-6 py-4 text-slate-300">{item.requesterEmail}</td>
+                      <td className="px-6 py-4 text-slate-300">{item.date}</td>
+                      <td className="px-6 py-4 text-slate-300">{item.startTime} - {item.endTime}</td>
+                      <td className="px-6 py-4">
+                        <Link
+                          to="/dashboard/admin/bookings"
+                          className="rounded-lg bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-400 hover:bg-emerald-500/20 transition-colors"
+                        >
+                          Review
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
     </motion.section>

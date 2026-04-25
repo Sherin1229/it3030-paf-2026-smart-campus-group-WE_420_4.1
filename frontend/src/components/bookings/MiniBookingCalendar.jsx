@@ -12,17 +12,9 @@ const MONTHS = [
   'Jul','Aug','Sep','Oct','Nov','Dec'
 ]
 
-// Sample existing bookings for availability display
-const existingBookings = [
-  { date: '2026-04-20', resource: 'Advanced AI Lab',      status: 'Approved' },
-  { date: '2026-04-22', resource: 'Main Lecture Hall',     status: 'Approved' },
-  { date: '2026-04-25', resource: 'Main Lecture Hall',     status: 'Pending'  },
-  { date: '2026-04-25', resource: 'Advanced AI Lab',       status: 'Pending'  },
-  { date: '2026-04-26', resource: 'Conference Room A',     status: 'Approved' },
-  { date: '2026-04-28', resource: 'Digital Projector Pro', status: 'Approved' },
-]
 
-const MiniBookingCalendar = ({ onDateSelect, selectedDate, selectedResource, resources = [] }) => {
+
+const MiniBookingCalendar = ({ onDateSelect, selectedDate, selectedResource, resources = [], bookings = [] }) => {
   const today = new Date()
   const [viewDate, setViewDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1))
   const [hoveredDate, setHoveredDate] = useState(null)
@@ -56,15 +48,24 @@ const MiniBookingCalendar = ({ onDateSelect, selectedDate, selectedResource, res
 
   const bookingMap = useMemo(() => {
     const map = {}
-    existingBookings.forEach(b => {
-      if (selectedResource && b.resource !== selectedResource) {
+    bookings.forEach(b => {
+      // Map backend fields to UI expected fields
+      const uiBooking = {
+        id: b.id,
+        date: b.date,
+        resource: b.resourceName,
+        user: b.requesterEmail,
+        status: b.status.charAt(0).toUpperCase() + b.status.slice(1).toLowerCase()
+      }
+
+      if (selectedResource && uiBooking.resource !== selectedResource) {
         return
       }
-      if (!map[b.date]) map[b.date] = []
-      map[b.date].push(b)
+      if (!map[uiBooking.date]) map[uiBooking.date] = []
+      map[uiBooking.date].push(uiBooking)
     })
     return map
-  }, [selectedResource])
+  }, [bookings, selectedResource])
 
   const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
 
