@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
+import { hasGoogleAuth } from '../../config/googleAuth';
 
 const RegisterForm = () => {
 	const [fullName, setFullName] = useState('');
@@ -186,16 +187,21 @@ const RegisterForm = () => {
 
 			<div className="my-3 text-center text-sm text-slate-400">or</div>
 
-			<div className="flex justify-center">
-				<GoogleLogin
-					onSuccess={handleGoogleSuccess}
-					onError={() => setMessage('Google sign-up failed.')}
-					useOneTap
-					theme="filled_blue"
-					shape="pill"
-					text="signup_with"
-				/>
-			</div>
+			{hasGoogleAuth ? (
+				<div className="flex justify-center">
+					<GoogleLogin
+						onSuccess={handleGoogleSuccess}
+						onError={() => setMessage('Google sign-up failed.')}
+						theme="filled_blue"
+						shape="pill"
+						text="signup_with"
+					/>
+				</div>
+			) : (
+				<p className="text-center text-sm text-slate-400">
+					Google sign-up is not configured for this environment.
+				</p>
+			)}
 
 			<p className="mt-4 text-center text-sm text-slate-300">
 				Already have an account? <Link to="/login">Sign in</Link>

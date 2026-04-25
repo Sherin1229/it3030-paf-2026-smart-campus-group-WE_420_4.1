@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
+import { hasGoogleAuth } from '../../config/googleAuth';
 
 const LoginForm = () => {
 	const [email, setEmail] = useState('');
@@ -116,15 +117,20 @@ const LoginForm = () => {
 
 			<div className="my-3 text-center text-sm text-slate-400">or</div>
 
-			<div className="flex justify-center">
-				<GoogleLogin
-					onSuccess={handleGoogleSuccess}
-					onError={() => setMessage('Google sign-in failed.')}
-					useOneTap
-					theme="filled_blue"
-					shape="pill"
-				/>
-			</div>
+			{hasGoogleAuth ? (
+				<div className="flex justify-center">
+					<GoogleLogin
+						onSuccess={handleGoogleSuccess}
+						onError={() => setMessage('Google sign-in failed.')}
+						theme="filled_blue"
+						shape="pill"
+					/>
+				</div>
+			) : (
+				<p className="text-center text-sm text-slate-400">
+					Google sign-in is not configured for this environment.
+				</p>
+			)}
 
 			<p className="mt-4 text-center text-sm text-slate-300">
 				Don't have an account? <Link to="/register">Create one</Link>
