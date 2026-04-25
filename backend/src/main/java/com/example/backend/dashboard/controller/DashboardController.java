@@ -28,6 +28,7 @@ public class DashboardController {
 
     @GetMapping("/admin/stats")
     public AdminDashboardStats getAdminStats() {
+        System.out.println("DEBUG: Dashboard stats requested at " + java.time.LocalDateTime.now());
         long pending = bookingRepository.countByStatus("PENDING");
         long activeRes = resourceRepository.countByStatus(ResourceStatus.ACTIVE);
         long approvedToday = bookingRepository.countByStatusAndDate("APPROVED", LocalDate.now());

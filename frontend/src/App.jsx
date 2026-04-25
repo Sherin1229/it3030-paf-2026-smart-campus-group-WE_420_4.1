@@ -13,6 +13,9 @@ import MyBookingsPage from './pages/bookings/MyBookingsPage'
 import CreateBookingPage from './pages/bookings/CreateBookingPage'
 import QRScannerPage from './pages/bookings/QRScannerPage'
 import AdminBookingsPage from './pages/bookings/AdminBookingsPage'
+import CreateMaintenanceTicketPage from './pages/maintenance/CreateMaintenanceTicketPage'
+import MyMaintenanceTicketsPage from './pages/maintenance/MyMaintenanceTicketsPage'
+import AdminMaintenanceTicketsPage from './pages/maintenance/AdminMaintenanceTicketsPage'
 import VerifyBookingPage from './pages/bookings/VerifyBookingPage'
 import UnauthorizedPage from './pages/UnauthorizedPage'
 import Navbar from './components/layout/Navbar'
@@ -39,6 +42,7 @@ function App() {
     currentPath.startsWith('/dashboard/user') ||
     currentPath.startsWith('/dashboard/admin') ||
     currentPath.startsWith('/profile') ||
+    currentPath.startsWith('/maintenance')
     currentPath.startsWith('/verify-booking')
 
   return (
@@ -69,6 +73,8 @@ function App() {
                 <Route path="/dashboard/user/bookings" element={<UserBookingsPage />} />
                 <Route path="/dashboard/user/bookings/my" element={<MyBookingsPage />} />
                 <Route path="/dashboard/user/bookings/create" element={<CreateBookingPage />} />
+                <Route path="/dashboard/user/maintenance" element={<MyMaintenanceTicketsPage />} />
+                <Route path="/dashboard/user/maintenance/create" element={<CreateMaintenanceTicketPage />} />
                 <Route path="/dashboard/user/bookings/scan" element={<QRScannerPage />} />
                 <Route path="/dashboard/user/resources" element={<UserResourcesPage />} />
                 <Route path="/profile" element={<UserProfilePage />} />
@@ -84,6 +90,7 @@ function App() {
                 <Route path="/dashboard/admin/resources/edit/:id" element={<AdminCreateResourcePage />} />
                 <Route path="/dashboard/admin/analytics" element={<AdminAnalyticsPage />} />
                 <Route path="/dashboard/admin/bookings" element={<AdminBookingsPage />} />
+                <Route path="/dashboard/admin/maintenance" element={<AdminMaintenanceTicketsPage />} />
               </Route>
             </Route>
           </Route>
