@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { QRCodeCanvas } from 'qrcode.react'
 import resourceService from '../../api/resourceService'
 
 const AdminResourcePanel = () => {
@@ -11,7 +10,6 @@ const AdminResourcePanel = () => {
   const [searchText, setSearchText] = useState('')
   const [activeTab, setActiveTab] = useState('all')
   const [successMsg, setSuccessMsg] = useState('')
-  const [qrResource, setQrResource] = useState(null)
 
   useEffect(() => {
     fetchResources()
@@ -237,13 +235,7 @@ const AdminResourcePanel = () => {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
-                        <button
-                          onClick={() => setQrResource(resource)}
-                          className="rounded-lg p-2 text-slate-400 transition hover:bg-sky-500/20 hover:text-sky-400"
-                          title="View QR Code"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="M7 7h1v1H7z"/><path d="M7 16h1v1H7z"/><path d="M16 7h1v1H16z"/><path d="M16 16h1v1H16z"/><path d="M12 7h1v1h-1z"/><path d="M7 12h1v1H7z"/><path d="M12 12h1v1h-1z"/><path d="M16 12h1v1h-1z"/><path d="M12 16h1v1h-1z"/></svg>
-                        </button>
+
                         <button
                           onClick={() => navigate(`/dashboard/admin/resources/edit/${resource.id}`)}
                           className="rounded-lg p-2 text-slate-400 transition hover:bg-white/10 hover:text-white"
@@ -275,54 +267,7 @@ const AdminResourcePanel = () => {
         </div>
       </div>
 
-      {/* QR Code Modal */}
-      <AnimatePresence>
-        {qrResource && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setQrResource(null)}
-              className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-sm rounded-3xl border border-white/10 bg-slate-900 p-8 shadow-2xl text-center"
-            >
-              <h3 className="text-xl font-bold text-white">Resource QR Code</h3>
-              <p className="mt-1 text-sm text-slate-400">{qrResource.name}</p>
 
-              <div className="mt-8 flex justify-center rounded-2xl bg-white p-6 shadow-xl shadow-white/5">
-                <QRCodeCanvas 
-                  value={qrResource.code || `RES-${qrResource.id}`} 
-                  size={200}
-                  level="H"
-                  includeMargin={false}
-                />
-              </div>
-
-              <div className="mt-6 space-y-2">
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Resource Code</p>
-                <p className="text-lg font-mono font-bold text-sky-400">{qrResource.code || `RES-${qrResource.id}`}</p>
-              </div>
-
-              <p className="mt-4 text-[10px] text-slate-500 italic">
-                Print this code and place it at the entrance of the facility for student self-check-in.
-              </p>
-
-              <button
-                onClick={() => setQrResource(null)}
-                className="mt-8 w-full rounded-xl bg-white/5 py-3 text-sm font-bold text-white transition hover:bg-white/10"
-              >
-                Close
-              </button>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </div>
   )
 }

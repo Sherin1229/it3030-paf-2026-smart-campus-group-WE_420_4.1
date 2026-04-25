@@ -164,7 +164,7 @@ const AdminCreateResourcePage = () => {
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-400">Unique Resource Code (for QR)</label>
+                <label className="mb-1 block text-sm font-medium text-slate-400">Resource Identifier</label>
                 <input
                   type="text"
                   name="code"
