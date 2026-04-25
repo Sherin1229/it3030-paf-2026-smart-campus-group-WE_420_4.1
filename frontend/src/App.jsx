@@ -6,14 +6,17 @@ import RegisterPage from './pages/auth/RegisterPage'
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import UserDashboardPage from './pages/dashboard/UserDashboardPage'
 import AdminDashboardPage from './pages/dashboard/AdminDashboardPage'
+import UserResourcesPage from './pages/resources/UserResourcesPage'
 import UserProfilePage from './pages/profile/UserProfilePage'
 import UserBookingsPage from './pages/bookings/UserBookingsPage'
 import MyBookingsPage from './pages/bookings/MyBookingsPage'
 import CreateBookingPage from './pages/bookings/CreateBookingPage'
+import QRScannerPage from './pages/bookings/QRScannerPage'
 import AdminBookingsPage from './pages/bookings/AdminBookingsPage'
 import CreateMaintenanceTicketPage from './pages/maintenance/CreateMaintenanceTicketPage'
 import MyMaintenanceTicketsPage from './pages/maintenance/MyMaintenanceTicketsPage'
 import AdminMaintenanceTicketsPage from './pages/maintenance/AdminMaintenanceTicketsPage'
+import VerifyBookingPage from './pages/bookings/VerifyBookingPage'
 import UnauthorizedPage from './pages/UnauthorizedPage'
 import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
@@ -24,6 +27,14 @@ import ProtectedRoute from './routes/ProtectedRoute'
 import RoleRoute from './routes/RoleRoute'
 import PublicOnlyRoute from './routes/PublicOnlyRoute'
 
+
+//my imports - Module A
+import ResourceListPage from './pages/resources/ResourceListPage'
+import ResourceDetailPage from './pages/resources/ResourceDetailPage'
+import AdminResourcePanel from './pages/resources/AdminResourcePanel'
+import AdminCreateResourcePage from './pages/resources/AdminCreateResourcePage'
+import AdminAnalyticsPage from './pages/resources/AdminAnalyticsPage'
+
 function App() {
   const location = useLocation()
   const currentPath = location.pathname.toLowerCase()
@@ -32,6 +43,7 @@ function App() {
     currentPath.startsWith('/dashboard/admin') ||
     currentPath.startsWith('/profile') ||
     currentPath.startsWith('/maintenance')
+    currentPath.startsWith('/verify-booking')
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-x-hidden">
@@ -43,6 +55,10 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
+
+          {/* ✅ Public resource routes - anyone can view */}
+          <Route path="/resources" element={<ResourceListPage />} />
+          <Route path="/resources/:id" element={<ResourceDetailPage />} />
 
           <Route element={<PublicOnlyRoute />}>
             <Route path="/login" element={<LoginPage />} />
@@ -59,18 +75,27 @@ function App() {
                 <Route path="/dashboard/user/bookings/create" element={<CreateBookingPage />} />
                 <Route path="/dashboard/user/maintenance" element={<MyMaintenanceTicketsPage />} />
                 <Route path="/dashboard/user/maintenance/create" element={<CreateMaintenanceTicketPage />} />
+                <Route path="/dashboard/user/bookings/scan" element={<QRScannerPage />} />
+                <Route path="/dashboard/user/resources" element={<UserResourcesPage />} />
                 <Route path="/profile" element={<UserProfilePage />} />
               </Route>
             </Route>
+
             <Route element={<RoleRoute allowedRoles={['ADMIN']} />}>
               <Route element={<AdminDashboardLayout />}>
                 <Route path="/dashboard/admin" element={<AdminDashboardPage />} />
+                {/* ✅ Admin resource management - only admin can access */}
+                <Route path="/dashboard/admin/resources" element={<AdminResourcePanel />} />
+                <Route path="/dashboard/admin/resources/create" element={<AdminCreateResourcePage />} />
+                <Route path="/dashboard/admin/resources/edit/:id" element={<AdminCreateResourcePage />} />
+                <Route path="/dashboard/admin/analytics" element={<AdminAnalyticsPage />} />
                 <Route path="/dashboard/admin/bookings" element={<AdminBookingsPage />} />
                 <Route path="/dashboard/admin/maintenance" element={<AdminMaintenanceTicketsPage />} />
               </Route>
             </Route>
           </Route>
 
+          <Route path="/verify-booking" element={<VerifyBookingPage />} />
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
           <Route path="*" element={<HomePage />} />
         </Routes>

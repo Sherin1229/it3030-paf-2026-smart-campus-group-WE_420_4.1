@@ -9,10 +9,17 @@ import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Table(name = "booking_requests")
+@Getter
+@Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class BookingRequest {
 
     @Id
@@ -50,11 +57,8 @@ public class BookingRequest {
     private String status;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
-
-    protected BookingRequest() {
-    }
 
     public BookingRequest(
             String requesterEmail,
@@ -77,53 +81,5 @@ public class BookingRequest {
         this.purpose = purpose;
         this.attendees = attendees;
         this.status = status;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getRequesterEmail() {
-        return requesterEmail;
-    }
-
-    public String getResourceId() {
-        return resourceId;
-    }
-
-    public String getResourceName() {
-        return resourceName;
-    }
-
-    public String getResourceType() {
-        return resourceType;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public LocalTime getStartTime() {
-        return startTime;
-    }
-
-    public LocalTime getEndTime() {
-        return endTime;
-    }
-
-    public String getPurpose() {
-        return purpose;
-    }
-
-    public Integer getAttendees() {
-        return attendees;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
     }
 }
