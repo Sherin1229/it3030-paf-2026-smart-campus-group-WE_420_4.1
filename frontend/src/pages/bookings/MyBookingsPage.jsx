@@ -10,6 +10,7 @@ const STATUS_COLORS = {
   REJECTED: { bg: 'bg-rose-500/10 text-rose-300 ring-rose-500/20', dot: 'bg-rose-400' },
   EXPIRED:  { bg: 'bg-slate-500/10 text-slate-400 ring-slate-500/20', dot: 'bg-slate-500' },
   CHECKED_IN: { bg: 'bg-sky-500/10 text-sky-300 ring-sky-500/20', dot: 'bg-sky-400' },
+  COMPLETED: { bg: 'bg-indigo-500/10 text-indigo-300 ring-indigo-500/20', dot: 'bg-indigo-400' },
 }
 
 const BOOKING_API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'}/bookings`

@@ -11,6 +11,7 @@ const STATUS_COLORS = {
   Rejected: { bg: 'bg-rose-500/10 text-rose-300 ring-rose-500/20', dot: 'bg-rose-400' },
   Expired:  { bg: 'bg-slate-500/10 text-slate-400 ring-slate-500/20', dot: 'bg-slate-500' },
   Checked_in: { bg: 'bg-sky-500/10 text-sky-300 ring-sky-500/20', dot: 'bg-sky-400' },
+  Completed: { bg: 'bg-indigo-500/10 text-indigo-300 ring-indigo-500/20', dot: 'bg-indigo-400' },
 }
 
 const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'}/bookings`
@@ -70,7 +71,7 @@ const AdminBookingsPage = () => {
         resourceType: b.resourceType,
         resourceCode: b.resourceCode,
         date: b.date,
-        status: b.status.charAt(0).toUpperCase() + b.status.slice(1).toLowerCase()
+        status: b.status.charAt(0).toUpperCase() + b.status.slice(1).toLowerCase().replace(/_([a-z])/g, (_, char) => '_' + char.toLowerCase())
       }))
       setBookings(mapped)
     } catch (err) {
@@ -253,7 +254,7 @@ const AdminBookingsPage = () => {
       <>
       {/* Filter Tabs */}
       <div className="mt-6 flex gap-2 flex-wrap">
-        {['All', 'Pending', 'Approved', 'Rejected', 'Expired', 'Checked_in'].map(tab => (
+        {['All', 'Pending', 'Approved', 'Rejected', 'Expired', 'Checked_in', 'Completed'].map(tab => (
           <button
             key={tab}
             onClick={() => setFilter(tab)}
