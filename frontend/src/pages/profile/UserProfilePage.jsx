@@ -22,7 +22,7 @@ const UserProfilePage = () => {
 
   const fetchStats = async () => {
     try {
-      const API_BOOKINGS_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://10.50.20.47:8081/api'}/bookings/my?email=${user.email}`
+      const API_BOOKINGS_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'}/bookings/my?email=${user.email}`
       const response = await fetch(API_BOOKINGS_URL)
       if (response.ok) {
         const data = await response.json()

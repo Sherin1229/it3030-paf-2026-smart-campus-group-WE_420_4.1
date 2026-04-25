@@ -8,6 +8,9 @@ const UserResourcesPage = () => {
   const [selectedResource, setSelectedResource] = useState(null)
   const [activeType, setActiveType] = useState('ALL')
   const [searchText, setSearchText] = useState('')
+  const [showFilters, setShowFilters] = useState(false)
+  const [filterActiveOnly, setFilterActiveOnly] = useState(false)
+  const [minCapacity, setMinCapacity] = useState(0)
 
   useEffect(() => {
     fetchResources()
@@ -30,16 +33,37 @@ const UserResourcesPage = () => {
       r.name.toLowerCase().includes(searchText.toLowerCase()) ||
       r.location.toLowerCase().includes(searchText.toLowerCase())
     const matchesType = activeType === 'ALL' || r.type === activeType
-    return matchesSearch && matchesType
+    const matchesStatus = !filterActiveOnly || r.status === 'ACTIVE'
+    const matchesCapacity = r.capacity >= minCapacity
+    return matchesSearch && matchesType && matchesStatus && matchesCapacity
   })
 
-  const ResourceIcon = ({ type }) => {
+  const ResourceIcon = ({ type, className = "w-6 h-6" }) => {
     switch (type) {
-      case 'LAB': return '🔬'
-      case 'LECTURE_HALL': return '🏛️'
-      case 'MEETING_ROOM': return '🤝'
-      case 'EQUIPMENT': return '🎥'
-      default: return '📦'
+      case 'LAB':
+        return (
+          <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 2v7.31"/><path d="M14 2v7.31"/><path d="M6 20.82l1.79-6.82h8.42l1.79 6.82A2 2 0 0 1 16.07 23H7.93a2 2 0 0 1-1.93-2.18z"/></svg>
+        )
+      case 'LECTURE_HALL':
+        return (
+          <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+        )
+      case 'MEETING_ROOM':
+        return (
+          <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+        )
+      case 'AUDITORIUM':
+        return (
+          <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 13a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M2 17h20"/><path d="M2 21h20"/></svg>
+        )
+      case 'PLAYGROUND':
+        return (
+          <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 22h20"/><path d="M7 22v-5"/><path d="M12 22v-8"/><path d="M17 22v-3"/></svg>
+        )
+      default:
+        return (
+          <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+        )
     }
   }
 
@@ -56,21 +80,84 @@ const UserResourcesPage = () => {
           <p className="mt-1 text-slate-400">Discover and book campus facilities for your academic needs.</p>
         </div>
         
-        <div className="relative group">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 transition-colors group-focus-within:text-indigo-400" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-          <input
-            type="text"
-            placeholder="Search by name or location..."
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            className="w-full rounded-xl border border-white/10 bg-slate-900/40 py-2.5 pl-10 pr-4 text-sm text-white placeholder-slate-500 outline-none transition focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/10 md:w-80"
-          />
+        <div className="flex items-center gap-2">
+          <div className="relative group">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 transition-colors group-focus-within:text-indigo-400" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input
+              type="text"
+              placeholder="Search by name or location..."
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              className="w-full rounded-xl border border-white/10 bg-slate-900/40 py-2.5 pl-10 pr-4 text-sm text-white placeholder-slate-500 outline-none transition focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/10 md:w-80"
+            />
+          </div>
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className={`flex h-10 w-10 items-center justify-center rounded-xl border transition-all ${
+              showFilters || filterActiveOnly || minCapacity > 0
+                ? 'border-indigo-500/50 bg-indigo-500/10 text-indigo-400'
+                : 'border-white/10 bg-slate-900/40 text-slate-500 hover:text-slate-300'
+            }`}
+            title="Filter Options"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+          </button>
         </div>
       </motion.div>
 
+      {/* Advanced Filters Panel */}
+      <AnimatePresence>
+        {showFilters && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="grid gap-6 rounded-2xl border border-white/5 bg-slate-900/20 p-6 md:grid-cols-2">
+              <div className="space-y-3">
+                <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Availability</label>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setFilterActiveOnly(!filterActiveOnly)}
+                    className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all ${
+                      filterActiveOnly
+                        ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30'
+                        : 'bg-slate-800 text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <div className={`h-2 w-2 rounded-full ${filterActiveOnly ? 'bg-emerald-400' : 'bg-slate-600'}`} />
+                    Available Only
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Minimum Capacity: {minCapacity} Seats</label>
+                <input
+                  type="range"
+                  min="0"
+                  max="500"
+                  step="10"
+                  value={minCapacity}
+                  onChange={(e) => setMinCapacity(parseInt(e.target.value))}
+                  className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-800 accent-indigo-500"
+                />
+                <div className="flex justify-between text-[10px] text-slate-600">
+                  <span>Any</span>
+                  <span>100</span>
+                  <span>250</span>
+                  <span>500+</span>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Filter Tabs */}
       <div className="flex flex-wrap gap-2 overflow-x-auto pb-2 scrollbar-hide">
-        {['ALL', 'LAB', 'LECTURE_HALL', 'MEETING_ROOM', 'EQUIPMENT'].map((type) => (
+        {['ALL', 'LAB', 'LECTURE_HALL', 'MEETING_ROOM', 'ROOM', 'AUDITORIUM', 'PLAYGROUND'].map((type) => (
           <button
             key={type}
             onClick={() => setActiveType(type)}
@@ -112,7 +199,7 @@ const UserResourcesPage = () => {
                 <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-indigo-500/10 blur-3xl transition-opacity group-hover:opacity-100 opacity-0" />
                 
                 <div className="relative z-10 flex items-start justify-between">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-800 text-2xl shadow-inner transition group-hover:bg-indigo-500/20">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-800 text-indigo-400 shadow-inner transition duration-300 group-hover:scale-110 group-hover:bg-indigo-500/20 group-hover:text-indigo-300">
                     <ResourceIcon type={resource.type} />
                   </div>
                   <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase ring-1 ring-inset ${
@@ -185,8 +272,8 @@ const UserResourcesPage = () => {
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                 </button>
-                <div className="absolute -bottom-10 left-8 flex h-20 w-20 items-center justify-center rounded-2xl bg-slate-900 text-4xl shadow-xl border border-white/10">
-                  <ResourceIcon type={selectedResource.type} />
+                <div className="absolute -bottom-10 left-8 flex h-20 w-20 items-center justify-center rounded-2xl bg-slate-900 text-indigo-400 shadow-xl border border-white/10">
+                  <ResourceIcon type={selectedResource.type} className="w-10 h-10" />
                 </div>
               </div>
 
@@ -227,7 +314,7 @@ const UserResourcesPage = () => {
                       <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Availability</p>
                       <p className="mt-1 flex items-center gap-2 text-white font-medium">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-400"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-                        {selectedResource.availabilityWindows || 'Always Available'}
+                        {selectedResource.availabilityWindow || 'Always Available'}
                       </p>
                     </div>
                     <div>

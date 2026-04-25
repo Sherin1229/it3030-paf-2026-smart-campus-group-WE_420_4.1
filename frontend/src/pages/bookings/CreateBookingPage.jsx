@@ -3,8 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import MiniBookingCalendar from '../../components/bookings/MiniBookingCalendar'
 import { useAuth } from '../../context/AuthContext'
 
-const BOOKING_API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://10.50.20.47:8081/api'}/bookings`
-const RESOURCE_API_BASE_URL = `${import.meta.env.VITE_API_V1_BASE_URL || 'http://172.28.11.53:8081/api/v1'}/resources`
+const BOOKING_API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'}/bookings`
+const RESOURCE_API_BASE_URL = `${import.meta.env.VITE_API_V1_BASE_URL || 'http://localhost:8080/api/v1'}/resources`
 
 const CreateBookingPage = () => {
   const location = useLocation()
