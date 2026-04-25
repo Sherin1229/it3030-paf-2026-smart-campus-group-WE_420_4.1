@@ -4,7 +4,7 @@ import MiniBookingCalendar from '../../components/bookings/MiniBookingCalendar'
 import { useAuth } from '../../context/AuthContext'
 
 const BOOKING_API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://10.50.20.47:8081/api'}/bookings`
-const RESOURCE_API_BASE_URL = 'http://10.50.20.47:8081/api/v1/resources'
+const RESOURCE_API_BASE_URL = `${import.meta.env.VITE_API_V1_BASE_URL || 'http://172.28.11.53:8081/api/v1'}/resources`
 
 const CreateBookingPage = () => {
   const location = useLocation()
@@ -333,7 +333,7 @@ const CreateBookingPage = () => {
             <ul className="mt-4 space-y-3 text-sm text-slate-400">
               <li className="flex gap-2">
                 <span className="text-sky-400 font-bold">•</span>
-                Bookings must be made at least 24 hours in advance.
+                Bookings can be made for immediate use if available.
               </li>
               <li className="flex gap-2">
                 <span className="text-sky-400 font-bold">•</span>

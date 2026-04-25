@@ -235,6 +235,7 @@ const AdminResourcePanel = () => {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
+
                         <button
                           onClick={() => navigate(`/dashboard/admin/resources/edit/${resource.id}`)}
                           className="rounded-lg p-2 text-slate-400 transition hover:bg-white/10 hover:text-white"
@@ -265,6 +266,8 @@ const AdminResourcePanel = () => {
           </table>
         </div>
       </div>
+
+
     </div>
   )
 }

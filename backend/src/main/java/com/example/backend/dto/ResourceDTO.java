@@ -13,6 +13,9 @@ public class ResourceDTO {
     @NotBlank(message = "Name is required")
     private String name;
 
+    @NotBlank(message = "Resource code is required")
+    private String code;
+
     @NotNull(message = "Type is required")
     private ResourceType type;
 

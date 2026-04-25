@@ -10,6 +10,7 @@ const AdminCreateResourcePage = () => {
 
   const [formData, setFormData] = useState({
     name: '',
+    code: '',
     type: 'LAB',
     capacity: '',
     location: '',
@@ -158,6 +159,19 @@ const AdminCreateResourcePage = () => {
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="e.g. Computer Lab A101"
+                  className="w-full rounded-xl border border-white/10 bg-slate-800/50 px-4 py-3 text-white transition focus:border-emerald-500/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-400">Resource Identifier</label>
+                <input
+                  type="text"
+                  name="code"
+                  required
+                  value={formData.code}
+                  onChange={handleChange}
+                  placeholder="e.g. LAB-A101"
                   className="w-full rounded-xl border border-white/10 bg-slate-800/50 px-4 py-3 text-white transition focus:border-emerald-500/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                 />
               </div>

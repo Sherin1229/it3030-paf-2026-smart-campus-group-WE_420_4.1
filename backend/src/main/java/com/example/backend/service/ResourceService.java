@@ -51,6 +51,7 @@ public class ResourceService {
     public Resource createResource(ResourceDTO dto) {
         Resource resource = new Resource();
         resource.setName(dto.getName());
+        resource.setCode(dto.getCode());
         resource.setType(dto.getType());
         resource.setCapacity(dto.getCapacity());
         resource.setLocation(dto.getLocation());
@@ -64,6 +65,7 @@ public class ResourceService {
     public Optional<Resource> updateResource(Long id, ResourceDTO dto) {
         return resourceRepository.findById(id).map(resource -> {
             resource.setName(dto.getName());
+            resource.setCode(dto.getCode());
             resource.setType(dto.getType());
             resource.setCapacity(dto.getCapacity());
             resource.setLocation(dto.getLocation());
