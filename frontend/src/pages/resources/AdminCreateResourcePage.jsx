@@ -35,11 +35,10 @@ const AdminCreateResourcePage = () => {
       setFetching(true)
       const data = await resourceService.getResourceById(id)
       
-      // Parse availabilityWindows (Expected format: "HH:mm-HH:mm")
       let start = '08:00'
       let end = '18:00'
-      if (data.availabilityWindows && data.availabilityWindows.includes('-')) {
-        const parts = data.availabilityWindows.split('-')
+      if (data.availabilityWindow && data.availabilityWindow.includes('-')) {
+        const parts = data.availabilityWindow.split('-')
         start = parts[0]
         end = parts[1]
       }
@@ -71,7 +70,7 @@ const AdminCreateResourcePage = () => {
       const payload = {
         ...formData,
         capacity: formData.capacity ? parseInt(formData.capacity) : null,
-        availabilityWindows: `${formData.startTime}-${formData.endTime}`
+        availabilityWindow: `${formData.startTime}-${formData.endTime}`
       }
 
       if (isEdit) {
@@ -176,21 +175,35 @@ const AdminCreateResourcePage = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-slate-400">Resource Type</label>
-                  <select
-                    name="type"
-                    value={formData.type}
-                    onChange={handleChange}
-                    className="w-full rounded-xl border border-white/10 bg-slate-800/50 px-4 py-3 text-white transition focus:border-emerald-500/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                  >
-                    <option value="LAB">Lab</option>
-                    <option value="LECTURE_HALL">Lecture Hall</option>
-                    <option value="MEETING_ROOM">Meeting Room</option>
-                    <option value="EQUIPMENT">Equipment</option>
-                  </select>
+              <div className="space-y-4">
+                <label className="block text-sm font-medium text-slate-400">Resource Type</label>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {[
+                    { id: 'LAB', label: 'Lab', icon: 'M10 2v7.31 M14 2v7.31 M6 20.82l1.79-6.82h8.42l1.79 6.82A2 2 0 0 1 16.07 23H7.93a2 2 0 0 1-1.93-2.18z' },
+                    { id: 'LECTURE_HALL', label: 'Hall', icon: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z' },
+                    { id: 'MEETING_ROOM', label: 'Meeting', icon: 'M3 3h18v18H3z M3 9h18 M9 21V9' },
+                    { id: 'ROOM', label: 'Room', icon: 'M3 12h18M3 6h18M3 18h18' },
+                    { id: 'AUDITORIUM', label: 'Auditorium', icon: 'M2 13a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z M2 17h20 M2 21h20' },
+                    { id: 'PLAYGROUND', label: 'Playground', icon: 'M2 22h20 M7 22v-5 M12 22v-8 M17 22v-3' }
+                  ].map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, type: t.id })}
+                      className={`flex flex-col items-center gap-2 rounded-xl border p-3 transition-all ${
+                        formData.type === t.id
+                          ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400 shadow-lg shadow-emerald-500/20'
+                          : 'border-white/5 bg-slate-800/30 text-slate-500 hover:border-white/10 hover:text-slate-300'
+                      }`}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={t.icon}/></svg>
+                      <span className="text-[10px] font-bold uppercase tracking-wider">{t.label}</span>
+                    </button>
+                  ))}
                 </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4">
                 <div>
                   <label className="mb-1 block text-sm font-medium text-slate-400">Capacity</label>
                   <input
@@ -198,7 +211,7 @@ const AdminCreateResourcePage = () => {
                     name="capacity"
                     value={formData.capacity}
                     onChange={handleChange}
-                    placeholder="0"
+                    placeholder="Maximum occupancy or quantity"
                     className="w-full rounded-xl border border-white/10 bg-slate-800/50 px-4 py-3 text-white transition focus:border-emerald-500/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                   />
                 </div>

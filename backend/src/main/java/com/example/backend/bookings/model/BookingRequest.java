@@ -57,7 +57,7 @@ public class BookingRequest {
     private String status;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     public BookingRequest(

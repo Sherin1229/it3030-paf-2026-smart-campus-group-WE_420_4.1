@@ -11,6 +11,35 @@ const AdminResourcePanel = () => {
   const [activeTab, setActiveTab] = useState('all')
   const [successMsg, setSuccessMsg] = useState('')
 
+  const getResourceIcon = (type) => {
+    switch (type) {
+      case 'LAB':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 2v7.31"/><path d="M14 2v7.31"/><path d="M6 20.82l1.79-6.82h8.42l1.79 6.82A2 2 0 0 1 16.07 23H7.93a2 2 0 0 1-1.93-2.18z"/></svg>
+        )
+      case 'LECTURE_HALL':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+        )
+      case 'MEETING_ROOM':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+        )
+      case 'AUDITORIUM':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 13a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M2 17h20"/><path d="M2 21h20"/></svg>
+        )
+      case 'PLAYGROUND':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 22h20"/><path d="M7 22v-5"/><path d="M12 22v-8"/><path d="M17 22v-3"/></svg>
+        )
+      default:
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+        )
+    }
+  }
+
   useEffect(() => {
     fetchResources()
   }, [])
@@ -151,7 +180,7 @@ const AdminResourcePanel = () => {
       {/* Filter & Search Bar */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between rounded-2xl border border-white/5 bg-slate-900/20 p-4">
         <div className="flex flex-wrap gap-2">
-          {['all', 'LAB', 'LECTURE_HALL', 'MEETING_ROOM', 'EQUIPMENT'].map((tab) => (
+          {['all', 'LAB', 'LECTURE_HALL', 'MEETING_ROOM', 'ROOM', 'AUDITORIUM', 'PLAYGROUND'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -203,11 +232,16 @@ const AdminResourcePanel = () => {
                   <tr key={resource.id} className="group transition hover:bg-white/5">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-4">
-                        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-800 text-slate-400 transition group-hover:bg-emerald-500/20 group-hover:text-emerald-400`}>
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"/><path d="M3 9V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4"/></svg>
+                        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-800 text-slate-400 transition-all duration-300 group-hover:scale-110 group-hover:bg-emerald-500/20 group-hover:text-emerald-400 group-hover:shadow-lg group-hover:shadow-emerald-500/20`}>
+                          {getResourceIcon(resource.type)}
                         </div>
                         <div>
-                          <p className="font-bold text-white">{resource.name}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="font-bold text-white group-hover:text-emerald-300 transition-colors">{resource.name}</p>
+                            <span className="inline-flex rounded bg-slate-800 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-tighter text-slate-400 group-hover:bg-emerald-500/10 group-hover:text-emerald-400">
+                              {resource.type.replace(/_/g, ' ')}
+                            </span>
+                          </div>
                           <p className="text-xs text-slate-400">{resource.location}</p>
                         </div>
                       </div>
@@ -218,7 +252,7 @@ const AdminResourcePanel = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="text-xs font-medium text-slate-300">{resource.availabilityWindows || 'Always Open'}</p>
+                      <p className="text-xs font-medium text-slate-300">{resource.availabilityWindow || 'Always Open'}</p>
                     </td>
                     <td className="px-6 py-4">
                       <button
