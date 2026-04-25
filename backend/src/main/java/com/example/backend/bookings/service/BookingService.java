@@ -82,6 +82,10 @@ public class BookingService {
         System.out.println("Check-in successful for booking ID: " + booking.getId());
         booking.setStatus("CHECKED_IN");
         bookingRequestRepository.save(booking);
+
+        // Update resource status immediately
+        resource.setStatus(com.example.backend.model.ResourceStatus.OCCUPIED);
+        resourceRepository.save(resource);
     }
 
     public List<BookingResponse> getUserBookings(String email) {
@@ -126,6 +130,18 @@ public class BookingService {
         if (requesterEmail.isBlank() || resourceId.isBlank() || resourceName.isBlank() || resourceType.isBlank()
                 || purpose.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Requester, resource and purpose are required.");
+        }
+
+        // Check if resource is OUT_OF_SERVICE
+        try {
+            Long rId = Long.parseLong(resourceId);
+            resourceRepository.findById(rId).ifPresent(r -> {
+                if (r.getStatus() == com.example.backend.model.ResourceStatus.OUT_OF_SERVICE) {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Resource is currently out of service and cannot be booked.");
+                }
+            });
+        } catch (NumberFormatException e) {
+            // Ignore if ID is not a number
         }
 
         LocalDate date;
