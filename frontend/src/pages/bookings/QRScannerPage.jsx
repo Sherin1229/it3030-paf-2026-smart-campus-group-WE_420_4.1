@@ -39,7 +39,7 @@ const QRScannerPage = () => {
   const handleCheckIn = async (resourceCode) => {
     setStatus('processing')
     try {
-      const API_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://10.50.20.47:8081/api'}/bookings/check-in?email=${user.email}&resourceCode=${resourceCode}`
+      const API_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'}/bookings/check-in?email=${user.email}&resourceCode=${resourceCode}`
       const response = await fetch(API_URL, { method: 'POST' })
       const data = await response.json()
 

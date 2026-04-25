@@ -12,7 +12,7 @@ const STATUS_COLORS = {
   CHECKED_IN: { bg: 'bg-sky-500/10 text-sky-300 ring-sky-500/20', dot: 'bg-sky-400' },
 }
 
-const BOOKING_API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://10.50.20.47:8081/api'}/bookings`
+const BOOKING_API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'}/bookings`
 
 const MyBookingsPage = () => {
   const { user } = useAuth()

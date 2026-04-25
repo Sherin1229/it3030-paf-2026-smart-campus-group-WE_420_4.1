@@ -13,7 +13,32 @@ const STATUS_COLORS = {
   Checked_in: { bg: 'bg-sky-500/10 text-sky-300 ring-sky-500/20', dot: 'bg-sky-400' },
 }
 
-const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://10.50.20.47:8081/api'}/bookings`
+const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'}/bookings`
+
+const ResourceIcon = ({ type, className = "w-4 h-4" }) => {
+  switch (type) {
+    case 'LAB':
+      return (
+        <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 2v7.31"/><path d="M14 2v7.31"/><path d="M6 20.82l1.79-6.82h8.42l1.79 6.82A2 2 0 0 1 16.07 23H7.93a2 2 0 0 1-1.93-2.18z"/></svg>
+      )
+    case 'LECTURE_HALL':
+      return (
+        <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+      )
+    case 'MEETING_ROOM':
+      return (
+        <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+      )
+    case 'EQUIPMENT':
+      return (
+        <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"/><path d="M3 9V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4"/><path d="M12 13v4"/><path d="M9 15h6"/></svg>
+      )
+    default:
+      return (
+        <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+      )
+  }
+}
 
 const AdminBookingsPage = () => {
   const [bookings, setBookings] = useState([])
@@ -42,6 +67,7 @@ const AdminBookingsPage = () => {
         user: b.requesterEmail,
         resource: b.resourceName,
         resourceId: b.resourceId,
+        resourceType: b.resourceType,
         resourceCode: b.resourceCode,
         date: b.date,
         status: b.status.charAt(0).toUpperCase() + b.status.slice(1).toLowerCase()
@@ -300,8 +326,23 @@ const AdminBookingsPage = () => {
                     return (
                       <tr key={req.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                         <td className="px-4 py-4 font-medium text-white">{req.bookingCode}</td>
-                        <td className="px-4 py-4">{req.user}</td>
-                        <td className="px-4 py-4">{req.resource}</td>
+                        <td className="px-4 py-4 font-medium text-white">
+                          <div className="flex flex-col">
+                            <span className="text-white">{req.user.split('@')[0]}</span>
+                            <span className="text-[10px] text-slate-500">{req.user}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4">
+                          <div className="flex items-center gap-2">
+                            <div className="flex h-7 w-7 items-center justify-center rounded bg-slate-800 text-slate-400">
+                              <ResourceIcon type={req.resourceType} className="h-4 w-4" />
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-white font-semibold">{req.resource}</span>
+                              <span className="text-[10px] text-slate-500 uppercase tracking-tighter">{req.resourceType?.replace(/_/g, ' ')}</span>
+                            </div>
+                          </div>
+                        </td>
                         <td className="px-4 py-4">{req.date}</td>
                         <td className="px-4 py-4">
                           <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ${color.bg}`}>
@@ -314,14 +355,16 @@ const AdminBookingsPage = () => {
                             <div className="flex justify-end gap-2">
                               <button
                                 onClick={() => updateStatus(req.id, 'Approved')}
-                                className="rounded bg-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/30 transition-colors"
+                                className="flex items-center gap-1.5 rounded-lg bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-400 ring-1 ring-inset ring-emerald-500/20 hover:bg-emerald-500 hover:text-white transition-all shadow-lg shadow-emerald-500/10"
                               >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
                                 Approve
                               </button>
                               <button
                                 onClick={() => updateStatus(req.id, 'Rejected')}
-                                className="rounded bg-rose-500/20 px-3 py-1 text-xs font-semibold text-rose-300 hover:bg-rose-500/20 transition-colors"
+                                className="flex items-center gap-1.5 rounded-lg bg-rose-500/10 px-3 py-1.5 text-xs font-bold text-rose-400 ring-1 ring-inset ring-rose-500/20 hover:bg-rose-500 hover:text-white transition-all shadow-lg shadow-rose-500/10"
                               >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                                 Reject
                               </button>
                             </div>
