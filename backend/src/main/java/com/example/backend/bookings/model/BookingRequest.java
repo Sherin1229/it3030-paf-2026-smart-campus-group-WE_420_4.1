@@ -9,17 +9,10 @@ import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Table(name = "booking_requests")
-@Getter
-@Setter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class BookingRequest {
 
     @Id
@@ -60,6 +53,9 @@ public class BookingRequest {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    protected BookingRequest() {
+    }
+
     public BookingRequest(
             String requesterEmail,
             String resourceId,
@@ -81,5 +77,93 @@ public class BookingRequest {
         this.purpose = purpose;
         this.attendees = attendees;
         this.status = status;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getRequesterEmail() {
+        return requesterEmail;
+    }
+
+    public String getResourceId() {
+        return resourceId;
+    }
+
+    public String getResourceName() {
+        return resourceName;
+    }
+
+    public String getResourceType() {
+        return resourceType;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public LocalTime getStartTime() {
+        return startTime;
+    }
+
+    public LocalTime getEndTime() {
+        return endTime;
+    }
+
+    public String getPurpose() {
+        return purpose;
+    }
+
+    public Integer getAttendees() {
+        return attendees;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setRequesterEmail(String requesterEmail) {
+        this.requesterEmail = requesterEmail;
+    }
+
+    public void setResourceId(String resourceId) {
+        this.resourceId = resourceId;
+    }
+
+    public void setResourceName(String resourceName) {
+        this.resourceName = resourceName;
+    }
+
+    public void setResourceType(String resourceType) {
+        this.resourceType = resourceType;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
+    public void setStartTime(LocalTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public void setEndTime(LocalTime endTime) {
+        this.endTime = endTime;
+    }
+
+    public void setPurpose(String purpose) {
+        this.purpose = purpose;
+    }
+
+    public void setAttendees(Integer attendees) {
+        this.attendees = attendees;
     }
 }

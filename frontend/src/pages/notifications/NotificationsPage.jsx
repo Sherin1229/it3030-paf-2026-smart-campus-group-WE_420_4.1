@@ -60,6 +60,44 @@ const NotificationsPage = () => {
     }
   }
 
+  const updateNotification = async (notificationId, action) => {
+    try {
+      const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'
+      const params = new URLSearchParams({
+        role: user?.role || 'USER',
+      })
+      if (user?.email) {
+        params.append('email', user.email)
+      }
+
+      const endpoint = action === 'read'
+        ? `${apiUrl}/notifications/${notificationId}/read?${params.toString()}`
+        : `${apiUrl}/notifications/${notificationId}?${params.toString()}`
+
+      const response = await fetch(endpoint, {
+        method: action === 'read' ? 'PUT' : 'DELETE',
+        credentials: 'include',
+      })
+
+      if (!response.ok && response.status !== 204) {
+        throw new Error(`Failed to ${action} notification`)
+      }
+
+      if (action === 'read') {
+        setNotifications((current) =>
+          current.map((item) =>
+            item.notificationId === notificationId ? { ...item, isRead: true } : item,
+          ),
+        )
+      } else {
+        setNotifications((current) => current.filter((item) => item.notificationId !== notificationId))
+      }
+    } catch (err) {
+      setError(err.message || `Failed to ${action} notification`)
+      console.error(`Failed to ${action} notification`, err)
+    }
+  }
+
   const title = user?.role === 'ADMIN' ? 'All Admin Notifications' : 'All Notifications'
 
   const summary = useMemo(() => {
@@ -127,11 +165,16 @@ const NotificationsPage = () => {
             {notifications.map((item) => {
               const severityStyle = severityChip[item.severity] || severityChip.LOW
               const sourceStyle = sourceChip[item.sourceType] || sourceChip.BOOKING
+              const unread = !item.isRead
 
               return (
                 <article
                   key={item.notificationId}
-                  className="rounded-xl border border-white/10 bg-slate-950/40 px-4 py-4"
+                  className={`rounded-xl border px-4 py-4 transition ${
+                    unread
+                      ? 'border-cyan-400/30 bg-cyan-500/10'
+                      : 'border-white/10 bg-slate-950/40'
+                  }`}
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${sourceStyle}`}>
@@ -140,10 +183,38 @@ const NotificationsPage = () => {
                     <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${severityStyle}`}>
                       {item.severity}
                     </span>
+                    {unread ? (
+                      <span className="rounded-full border border-cyan-400/30 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cyan-200">
+                        Unread
+                      </span>
+                    ) : (
+                      <span className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-200">
+                        Read
+                      </span>
+                    )}
                     <span className="text-[11px] text-slate-400">{formatDate(item.createdAt)}</span>
                   </div>
-                  <h2 className="mt-2 text-sm font-semibold text-white">{item.title}</h2>
+                  <h2 className={`mt-2 text-sm font-semibold ${unread ? 'text-white' : 'text-slate-200'}`}>
+                    {item.title}
+                  </h2>
                   <p className="mt-1 text-sm text-slate-300">{item.message}</p>
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {!item.isRead && (
+                      <button
+                        onClick={() => updateNotification(item.notificationId, 'read')}
+                        className="rounded-lg border border-cyan-400/30 bg-cyan-500/10 px-3 py-1.5 text-xs font-semibold text-cyan-200 transition hover:bg-cyan-500/20"
+                      >
+                        Mark as read
+                      </button>
+                    )}
+                    <button
+                      onClick={() => updateNotification(item.notificationId, 'delete')}
+                      className="rounded-lg border border-rose-400/30 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-200 transition hover:bg-rose-500/20"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </article>
               )
             })}

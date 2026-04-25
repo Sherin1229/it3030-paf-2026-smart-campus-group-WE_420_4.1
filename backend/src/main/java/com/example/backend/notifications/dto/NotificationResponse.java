@@ -8,5 +8,6 @@ public record NotificationResponse(
         String message,
         String severity,
         String createdAt,
-        String route) {
+        String route,
+        boolean isRead) {
 }

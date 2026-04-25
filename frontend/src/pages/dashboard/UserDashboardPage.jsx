@@ -4,6 +4,8 @@ import { useAuth } from '../../context/AuthContext'
 import { motion } from 'framer-motion'
 import resourceService from '../../api/resourceService'
 
+const BOOKINGS_API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'}/bookings`
+
 const QuickAction = ({ title, text, link, icon, color }) => (
   <Link
     to={link}
@@ -35,7 +37,9 @@ const UserDashboardPage = () => {
 
   const fetchUserData = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'}/bookings/user/${user?.email}`)
+      if (!user?.email) return
+
+      const response = await fetch(`${BOOKINGS_API_BASE_URL}/my?email=${encodeURIComponent(user.email)}`)
       if (response.ok) {
         const data = await response.json()
         setStats({

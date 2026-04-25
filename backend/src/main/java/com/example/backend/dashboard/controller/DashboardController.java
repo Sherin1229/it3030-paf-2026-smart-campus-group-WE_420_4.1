@@ -38,12 +38,11 @@ public class DashboardController {
                 .map(bookingService::toResponse)
                 .collect(Collectors.toList());
 
-        return AdminDashboardStats.builder()
-                .pendingApprovals(pending)
-                .activeResources(activeRes)
-                .conflictFlags(0) // Placeholder for now
-                .approvedToday(approvedToday)
-                .approvalQueue(queue)
-                .build();
+        return new AdminDashboardStats(
+            pending,
+            activeRes,
+            0,
+            approvedToday,
+            queue);
     }
 }
