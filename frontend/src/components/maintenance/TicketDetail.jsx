@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { X, ChevronDown, MessageSquare, CheckCircle } from 'lucide-react'
+import { X, MessageSquare, CheckCircle } from 'lucide-react'
 
 const STATUS_COLORS = {
   OPEN: 'bg-emerald-500/10 text-emerald-300 ring-1 ring-emerald-500/20',
@@ -22,12 +22,16 @@ const TicketDetail = ({ ticket, onClose, onUpdateStatus, onAddNote, isLoading, u
   const [newNote, setNewNote] = useState('')
   const [newStatus, setNewStatus] = useState(ticket?.status || 'OPEN')
   const [rejectionReason, setRejectionReason] = useState('')
-  const [showStatusDropdown, setShowStatusDropdown] = useState(false)
 
   const canUpdateStatus = ['ADMIN', 'STAFF'].includes(userRole)
   const availableStatuses = userRole === 'ADMIN' 
     ? ['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED', 'REJECTED']
     : ['IN_PROGRESS', 'RESOLVED']
+
+  useEffect(() => {
+    setNewStatus(ticket?.status || 'OPEN')
+    setRejectionReason(ticket?.rejectionReason || '')
+  }, [ticket])
 
   const handleStatusUpdate = async () => {
     if (newStatus === 'REJECTED' && !rejectionReason.trim()) {
@@ -35,7 +39,6 @@ const TicketDetail = ({ ticket, onClose, onUpdateStatus, onAddNote, isLoading, u
       return
     }
     await onUpdateStatus(ticket.ticketId, newStatus, newStatus === 'REJECTED' ? rejectionReason : '')
-    setShowStatusDropdown(false)
   }
 
   const handleAddNote = async () => {
@@ -84,27 +87,40 @@ const TicketDetail = ({ ticket, onClose, onUpdateStatus, onAddNote, isLoading, u
             <div>
               <p className="text-sm font-medium text-gray-400 mb-2">Status</p>
               {canUpdateStatus ? (
-                <div className="relative">
-                  <button
-                    onClick={() => setShowStatusDropdown(!showStatusDropdown)}
-                    className={`w-full px-3 py-2 rounded-lg text-sm font-medium ${STATUS_COLORS[ticket.status]} flex items-center justify-between`}
+                <div className="space-y-3">
+                  <select
+                    value={newStatus}
+                    onChange={(e) => setNewStatus(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg text-sm font-medium bg-white/5 border border-white/10 text-white focus:border-blue-500 focus:outline-none"
                   >
-                    {ticket.status.replace('_', ' ')}
-                    <ChevronDown className="h-4 w-4" />
-                  </button>
-                  {showStatusDropdown && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-gray-900 border border-white/20 rounded-lg overflow-hidden z-10">
-                      {availableStatuses.map(status => (
-                        <button
-                          key={status}
-                          onClick={() => setNewStatus(status)}
-                          className={`w-full text-left px-3 py-2 text-sm ${newStatus === status ? 'bg-white/10' : 'hover:bg-white/5'}`}
-                        >
-                          {status.replace('_', ' ')}
-                        </button>
-                      ))}
+                    {availableStatuses.map((status) => (
+                      <option key={status} value={status} className="bg-slate-900 text-white">
+                        {status.replace('_', ' ')}
+                      </option>
+                    ))}
+                  </select>
+
+                  {newStatus !== ticket.status ? (
+                    <div className="rounded-lg border border-white/20 bg-white/5 p-4 space-y-3">
+                      {newStatus === 'REJECTED' ? (
+                        <textarea
+                          value={rejectionReason}
+                          onChange={(e) => setRejectionReason(e.target.value)}
+                          placeholder="Please provide a reason for rejection..."
+                          rows="2"
+                          className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition resize-none text-sm"
+                        />
+                      ) : null}
+                      <button
+                        onClick={handleStatusUpdate}
+                        disabled={isLoading}
+                        className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-medium rounded-lg transition flex items-center justify-center gap-2"
+                      >
+                        <CheckCircle className="h-5 w-5" />
+                        Update Status to {newStatus.replace('_', ' ')}
+                      </button>
                     </div>
-                  )}
+                  ) : null}
                 </div>
               ) : (
                 <span className={`inline-block px-3 py-1 rounded-lg text-sm font-medium ${STATUS_COLORS[ticket.status]}`}>
@@ -240,33 +256,6 @@ const TicketDetail = ({ ticket, onClose, onUpdateStatus, onAddNote, isLoading, u
               </div>
             ) : null}
           </div>
-
-          {/* Status Update & Rejection */}
-          {canUpdateStatus && showStatusDropdown && newStatus !== ticket.status && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white/5 border border-white/20 rounded-lg p-4 space-y-3"
-            >
-              {newStatus === 'REJECTED' && (
-                <textarea
-                  value={rejectionReason}
-                  onChange={(e) => setRejectionReason(e.target.value)}
-                  placeholder="Please provide a reason for rejection..."
-                  rows="2"
-                  className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition resize-none text-sm"
-                />
-              )}
-              <button
-                onClick={handleStatusUpdate}
-                disabled={isLoading}
-                className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-medium rounded-lg transition flex items-center justify-center gap-2"
-              >
-                <CheckCircle className="h-5 w-5" />
-                Update Status to {newStatus.replace('_', ' ')}
-              </button>
-            </motion.div>
-          )}
 
           {/* Dates */}
           <div className="text-xs text-gray-500 space-y-1 border-t border-white/10 pt-4">

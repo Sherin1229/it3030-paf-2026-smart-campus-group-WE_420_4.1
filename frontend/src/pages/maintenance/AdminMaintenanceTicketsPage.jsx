@@ -13,6 +13,7 @@ const AdminMaintenanceTicketsPage = () => {
   const [selectedTicket, setSelectedTicket] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
+  const [statusUpdateMessage, setStatusUpdateMessage] = useState('')
 
   useEffect(() => {
     fetchTickets()
@@ -44,6 +45,7 @@ const AdminMaintenanceTicketsPage = () => {
 
   const handleUpdateStatus = async (ticketId, newStatus, rejectionReason) => {
     try {
+      setStatusUpdateMessage('')
       const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'
       const payload = {
         status: newStatus,
@@ -61,13 +63,19 @@ const AdminMaintenanceTicketsPage = () => {
         throw new Error('Failed to update ticket status')
       }
 
-      // Update local state
-      setTickets(tickets.map(ticket =>
-        ticket.ticketId === ticketId
-          ? { ...ticket, status: newStatus, rejectionReason }
-          : ticket
-      ))
-      setSelectedTicket(prev => prev && prev.ticketId === ticketId ? { ...prev, status: newStatus } : prev)
+      const updatedTicket = normalizeTicket(await response.json())
+
+      setTickets((currentTickets) =>
+        currentTickets.map((ticket) =>
+          ticket.ticketId === ticketId ? updatedTicket : ticket
+        )
+      )
+      setSelectedTicket((prev) =>
+        prev && prev.ticketId === ticketId ? updatedTicket : prev
+      )
+      setStatusUpdateMessage(`Ticket #${ticketId} updated to ${newStatus.replace('_', ' ')}.`)
+      await fetchTickets()
+      setSelectedTicket(updatedTicket)
     } catch (err) {
       console.error('Error updating status:', err)
       alert('Failed to update ticket status')
@@ -146,6 +154,12 @@ const AdminMaintenanceTicketsPage = () => {
         <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg flex items-start gap-3">
           <AlertCircle className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" />
           <span className="text-red-300">{error}</span>
+        </div>
+      )}
+
+      {statusUpdateMessage && (
+        <div className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-emerald-200">
+          {statusUpdateMessage}
         </div>
       )}
 
