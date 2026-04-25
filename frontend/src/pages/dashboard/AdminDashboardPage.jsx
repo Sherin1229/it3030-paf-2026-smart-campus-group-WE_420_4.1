@@ -43,32 +43,40 @@ useEffect(() => {
 const fetchDashboardData = async () => {
   try {
     setLoading(true)
+    console.log('Fetching dashboard data...')
 
-    const [adminStatsResponse, resources, bookingsResponse] = await Promise.all([
-      fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081/api'}/dashboard/admin/stats`),
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081/api'
+    
+    // Fetch stats, resources, and bookings in parallel
+    const [statsRes, resData, bookingsRes] = await Promise.allSettled([
+      fetch(`${baseUrl}/dashboard/admin/stats`).then(r => r.ok ? r.json() : Promise.reject('Stats failed')),
       resourceService.getAllResources(),
-      fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081/api'}/bookings`).then(res => res.json())
+      fetch(`${baseUrl}/bookings`).then(r => r.ok ? r.json() : Promise.reject('Bookings failed'))
     ])
 
-    if (adminStatsResponse.ok) {
-      const adminStats = await adminStatsResponse.json()
-      setStatsData(adminStats)
+    if (statsRes.status === 'fulfilled') {
+      setStatsData(statsRes.value)
+    } else {
+      console.error('Stats fetch failed:', statsRes.reason)
     }
 
+    const resources = resData.status === 'fulfilled' ? resData.value : []
+    const bookings = bookingsRes.status === 'fulfilled' ? bookingsRes.value : []
+
     setStats({
-      pending: bookingsResponse.filter(b => b.status === 'PENDING').length,
+      pending: statsRes.status === 'fulfilled' ? statsRes.value.pendingApprovals : bookings.filter(b => b.status === 'PENDING').length,
       totalResources: resources.length,
       activeResources: resources.filter(r => r.status === 'ACTIVE').length,
-      recentBookings: bookingsResponse.slice(0, 5).map(b => ({
+      recentBookings: Array.isArray(bookings) ? bookings.slice(0, 5).map(b => ({
         id: b.id,
         user: b.requesterEmail,
         resource: b.resourceName,
         status: b.status,
         date: b.date
-      }))
+      })) : []
     })
   } catch (err) {
-    console.error('Failed to fetch dashboard data:', err)
+    console.error('Critical failure in fetchDashboardData:', err)
   } finally {
     setLoading(false)
   }
@@ -121,16 +129,6 @@ const fetchDashboardData = async () => {
           <p className="mt-2 text-slate-400 max-w-lg leading-relaxed text-sm">
             You have <span className="text-amber-400 font-bold">{stats.pending} pending requests</span> that need your attention today.
           </p>
-        </div>
-        
-        <div className="flex gap-2">
-          <button 
-            onClick={() => navigate('/dashboard/admin/resources/create')}
-            className="flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-400 shadow-lg shadow-emerald-500/20"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-            New Resource
-          </button>
         </div>
       </motion.div>
 
@@ -231,6 +229,7 @@ const fetchDashboardData = async () => {
   </div>
 
 </div>
+        </motion.div>
       </div>
     </div>
   )
