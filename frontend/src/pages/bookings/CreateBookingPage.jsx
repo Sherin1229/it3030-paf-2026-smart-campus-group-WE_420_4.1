@@ -15,21 +15,31 @@ const CreateBookingPage = () => {
   const [resources, setResources] = useState([])
   const [resourcesLoading, setResourcesLoading] = useState(true)
   const [resourcesError, setResourcesError] = useState('')
+  const [bookings, setBookings] = useState([])
 
   useEffect(() => {
-    const fetchResources = async () => {
+    const fetchData = async () => {
       try {
-        const res = await fetch(`${RESOURCE_API_BASE_URL}?status=ACTIVE`)
-        if (!res.ok) throw new Error('Failed to load resources.')
-        const data = await res.json()
-        setResources(data)
+        setResourcesLoading(true)
+        // Fetch Resources
+        const resResponse = await fetch(`${RESOURCE_API_BASE_URL}?status=ACTIVE`)
+        if (!resResponse.ok) throw new Error('Failed to load resources.')
+        const resData = await resResponse.json()
+        setResources(resData)
+
+        // Fetch Bookings for Calendar
+        const bookingsResponse = await fetch(BOOKING_API_BASE_URL)
+        if (bookingsResponse.ok) {
+          const bookingsData = await bookingsResponse.json()
+          setBookings(bookingsData)
+        }
       } catch (err) {
-        setResourcesError(err.message || 'Could not load resources.')
+        setResourcesError(err.message || 'Could not load required data.')
       } finally {
         setResourcesLoading(false)
       }
     }
-    fetchResources()
+    fetchData()
   }, [])
 
   const [formData, setFormData] = useState({
@@ -44,28 +54,99 @@ const CreateBookingPage = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
+  const [fieldErrors, setFieldErrors] = useState({})
+
+  const validateField = (name, value, currentData = formData) => {
+    const error = getError(name, value, currentData)
+    setFieldErrors(prev => ({ ...prev, [name]: error }))
+    return error
+  }
+
+  const getError = (name, value, currentData = formData) => {
+    const todayStr = new Date().toISOString().split('T')[0]
+    const selectedRes = resources.find(r => String(r.id) === (name === 'resourceId' ? value : currentData.resourceId))
+
+    switch (name) {
+      case 'resourceId':
+        return !value ? 'Please select a resource.' : ''
+      case 'date':
+        if (!value) return 'Date is required.'
+        if (value < todayStr) return 'Date cannot be in the past.'
+        return ''
+      case 'startTime':
+        if (!value) return 'Start time is required.'
+        if (currentData.endTime && value >= currentData.endTime) return 'Start time must be before end time.'
+        const startWindow = selectedRes?.availabilityWindow || selectedRes?.availabilityWindows
+        if (startWindow && startWindow.includes('-')) {
+          const [resStart, resEnd] = startWindow.split('-').map(t => t.trim())
+          if (value < resStart || value > resEnd) return `Outside availability (${startWindow})`
+        }
+        return ''
+      case 'endTime':
+        if (!value) return 'End time is required.'
+        if (currentData.startTime && value <= currentData.startTime) return 'End time must be after start time.'
+        const endWindow = selectedRes?.availabilityWindow || selectedRes?.availabilityWindows
+        if (endWindow && endWindow.includes('-')) {
+          const [resStart, resEnd] = endWindow.split('-').map(t => t.trim())
+          if (value < resStart || value > resEnd) return `Outside availability (${endWindow})`
+        }
+        return ''
+      case 'purpose':
+        if (!value) return 'Purpose is required.'
+        if (value.length < 5) return 'Min 5 characters required.'
+        return ''
+      case 'attendees':
+        if (value && Number(value) < 1) return 'Must be at least 1.'
+        return ''
+      default:
+        return ''
+    }
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+    const newData = { ...formData, [name]: value }
+    setFormData(newData)
+    validateField(name, value, newData)
+    
+    // Cross-validate times if one changes
+    if (name === 'startTime' && formData.endTime) validateField('endTime', formData.endTime, newData)
+    if (name === 'endTime' && formData.startTime) validateField('startTime', formData.startTime, newData)
   }
 
   const handleDateSelect = (date) => {
-    setFormData((prev) => ({ ...prev, date }))
+    const newData = { ...formData, date }
+    setFormData(newData)
+    validateField('date', date, newData)
   }
+
+  // Effect to re-validate times when resource changes
+  useEffect(() => {
+    if (formData.resourceId) {
+      if (formData.startTime) validateField('startTime', formData.startTime)
+      if (formData.endTime) validateField('endTime', formData.endTime)
+    }
+  }, [formData.resourceId])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setSubmitError('')
 
-    const selectedResource = resources.find((resource) => String(resource.id) === formData.resourceId)
-    if (!selectedResource) {
-      setSubmitError('Please select a valid resource.')
+    // Final check for all fields
+    const newFieldErrors = {}
+    Object.keys(formData).forEach(key => {
+      const err = getError(key, formData[key])
+      if (err) newFieldErrors[key] = err
+    })
+
+    setFieldErrors(newFieldErrors)
+
+    if (Object.values(newFieldErrors).some(e => e)) {
       return
     }
 
-    if (!user?.email) {
-      setSubmitError('Unable to identify the logged-in user. Please login again.')
+    const selectedResource = resources.find((resource) => String(resource.id) === formData.resourceId)
+    if (!selectedResource || !user?.email) {
+      alert('Missing resource or user information.')
       return
     }
 
@@ -73,15 +154,17 @@ const CreateBookingPage = () => {
 
     const payload = {
       requesterEmail: user.email,
-      resourceId: selectedResource.id,
+      resourceId: String(selectedResource.id),
       resourceName: selectedResource.name,
       resourceType: selectedResource.type,
       date: formData.date,
       startTime: formData.startTime,
       endTime: formData.endTime,
       purpose: formData.purpose,
-      attendees: formData.attendees ? Number(formData.attendees) : null,
+      attendees: formData.attendees && Number(formData.attendees) > 0 ? Number(formData.attendees) : null,
     }
+
+    console.log('Submitting Booking Payload:', payload)
 
     try {
       const response = await fetch(BOOKING_API_BASE_URL, {
@@ -94,7 +177,8 @@ const CreateBookingPage = () => {
 
       const responseBody = await response.json().catch(() => ({}))
       if (!response.ok) {
-        throw new Error(responseBody?.message || 'Failed to submit booking request.')
+        console.error('Server error details:', responseBody)
+        throw new Error(responseBody?.message || responseBody?.error || 'Failed to submit booking request.')
       }
 
       console.log('Booking Data Submitted:', responseBody)
@@ -103,7 +187,7 @@ const CreateBookingPage = () => {
       navigate('/dashboard/user/bookings/my')
     } catch (error) {
       setIsSubmitting(false)
-      setSubmitError(error.message || 'Failed to submit booking request.')
+      console.error('Submission failed:', error)
     }
   }
 
@@ -152,23 +236,28 @@ const CreateBookingPage = () => {
                       {resourcesError}
                     </div>
                   ) : (
-                    <select
-                      id="resourceId"
-                      name="resourceId"
-                      required
-                      value={formData.resourceId}
-                      onChange={handleChange}
-                      className="w-full rounded-xl border border-white/10 bg-slate-900/50 px-4 py-3 text-white focus:border-sky-500/50 focus:outline-none focus:ring-2 focus:ring-sky-500/20 transition-all appearance-none"
-                    >
-                      <option value="" disabled>Choose a hall, lab or equipment</option>
-                      {resources.length === 0 ? (
-                        <option value="" disabled>No resources available</option>
-                      ) : (
-                        resources.map(res => (
-                          <option key={res.id} value={res.id}>{res.name} ({res.type})</option>
-                        ))
-                      )}
-                    </select>
+                    <>
+                      <select
+                        id="resourceId"
+                        name="resourceId"
+                        required
+                        value={formData.resourceId}
+                        onChange={handleChange}
+                        className={`w-full rounded-xl border bg-slate-900/50 px-4 py-3 text-white focus:outline-none focus:ring-2 transition-all appearance-none ${
+                          fieldErrors.resourceId ? 'border-rose-500/50 focus:ring-rose-500/20' : 'border-white/10 focus:border-sky-500/50 focus:ring-sky-500/20'
+                        }`}
+                      >
+                        <option value="" disabled>Choose a hall, lab or equipment</option>
+                        {resources.length === 0 ? (
+                          <option value="" disabled>No resources available</option>
+                        ) : (
+                          resources.map(res => (
+                            <option key={res.id} value={res.id}>{res.name} ({res.type})</option>
+                          ))
+                        )}
+                      </select>
+                      {fieldErrors.resourceId && <p className="mt-1 text-[11px] font-medium text-rose-400">{fieldErrors.resourceId}</p>}
+                    </>
                   )}
                 </div>
 
@@ -182,10 +271,14 @@ const CreateBookingPage = () => {
                     id="date"
                     name="date"
                     required
+                    min={new Date().toISOString().split('T')[0]}
                     value={formData.date}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-white/10 bg-slate-900/50 px-4 py-3 text-white focus:border-sky-500/50 focus:outline-none focus:ring-2 focus:ring-sky-500/20 transition-all"
+                    className={`w-full rounded-xl border bg-slate-900/50 px-4 py-3 text-white focus:outline-none focus:ring-2 transition-all ${
+                      fieldErrors.date ? 'border-rose-500/50 focus:ring-rose-500/20' : 'border-white/10 focus:border-sky-500/50 focus:ring-sky-500/20'
+                    }`}
                   />
+                  {fieldErrors.date && <p className="mt-1 text-[11px] font-medium text-rose-400">{fieldErrors.date}</p>}
                 </div>
 
                 {/* Start Time */}
@@ -200,8 +293,11 @@ const CreateBookingPage = () => {
                     required
                     value={formData.startTime}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-white/10 bg-slate-900/50 px-4 py-3 text-white focus:border-sky-500/50 focus:outline-none focus:ring-2 focus:ring-sky-500/20 transition-all"
+                    className={`w-full rounded-xl border bg-slate-900/50 px-4 py-3 text-white focus:outline-none focus:ring-2 transition-all ${
+                      fieldErrors.startTime ? 'border-rose-500/50 focus:ring-rose-500/20' : 'border-white/10 focus:border-sky-500/50 focus:ring-sky-500/20'
+                    }`}
                   />
+                  {fieldErrors.startTime && <p className="mt-1 text-[11px] font-medium text-rose-400">{fieldErrors.startTime}</p>}
                 </div>
 
                 {/* End Time */}
@@ -216,8 +312,11 @@ const CreateBookingPage = () => {
                     required
                     value={formData.endTime}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-white/10 bg-slate-900/50 px-4 py-3 text-white focus:border-sky-500/50 focus:outline-none focus:ring-2 focus:ring-sky-500/20 transition-all"
+                    className={`w-full rounded-xl border bg-slate-900/50 px-4 py-3 text-white focus:outline-none focus:ring-2 transition-all ${
+                      fieldErrors.endTime ? 'border-rose-500/50 focus:ring-rose-500/20' : 'border-white/10 focus:border-sky-500/50 focus:ring-sky-500/20'
+                    }`}
                   />
+                  {fieldErrors.endTime && <p className="mt-1 text-[11px] font-medium text-rose-400">{fieldErrors.endTime}</p>}
                 </div>
               </div>
             </div>
@@ -241,8 +340,11 @@ const CreateBookingPage = () => {
                     placeholder="e.g. Guest lecture on Quantum Computing, Project team meeting..."
                     value={formData.purpose}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-white/10 bg-slate-900/50 px-4 py-3 text-white focus:border-sky-500/50 focus:outline-none focus:ring-2 focus:ring-sky-500/20 transition-all resize-none"
+                    className={`w-full rounded-xl border bg-slate-900/50 px-4 py-3 text-white focus:outline-none focus:ring-2 transition-all resize-none ${
+                      fieldErrors.purpose ? 'border-rose-500/50 focus:ring-rose-500/20' : 'border-white/10 focus:border-sky-500/50 focus:ring-sky-500/20'
+                    }`}
                   ></textarea>
+                  {fieldErrors.purpose && <p className="mt-1 text-[11px] font-medium text-rose-400">{fieldErrors.purpose}</p>}
                 </div>
 
                 <div className="space-y-2">
@@ -257,25 +359,23 @@ const CreateBookingPage = () => {
                     placeholder="Approximate count"
                     value={formData.attendees}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-white/10 bg-slate-900/50 px-4 py-3 text-white focus:border-sky-500/50 focus:outline-none focus:ring-2 focus:ring-sky-500/20 transition-all"
+                    className={`w-full rounded-xl border bg-slate-900/50 px-4 py-3 text-white focus:outline-none focus:ring-2 transition-all ${
+                      fieldErrors.attendees ? 'border-rose-500/50 focus:ring-rose-500/20' : 'border-white/10 focus:border-sky-500/50 focus:ring-sky-500/20'
+                    }`}
                   />
+                  {fieldErrors.attendees && <p className="mt-1 text-[11px] font-medium text-rose-400">{fieldErrors.attendees}</p>}
                 </div>
               </div>
             </div>
 
             <div className="flex items-center gap-4">
-              {submitError ? (
-                <p className="w-full rounded-xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm font-medium text-rose-300">
-                  {submitError}
-                </p>
-              ) : null}
             </div>
 
             <div className="flex items-center gap-4">
               <button
                 type="submit"
-                disabled={isSubmitting}
-                className="flex flex-1 items-center justify-center rounded-xl bg-sky-500 px-6 py-4 text-sm font-bold text-white shadow-lg shadow-sky-900/40 transition hover:bg-sky-400 disabled:opacity-50"
+                disabled={isSubmitting || Object.values(fieldErrors).some(err => err)}
+                className="flex flex-1 items-center justify-center rounded-xl bg-sky-500 px-6 py-4 text-sm font-bold text-white shadow-lg shadow-sky-900/40 transition hover:bg-sky-400 disabled:opacity-50 disabled:grayscale"
               >
                 {isSubmitting ? (
                   <span className="flex items-center gap-2">
@@ -351,6 +451,7 @@ const CreateBookingPage = () => {
                 selectedDate={formData.date}
                 selectedResource={resources.find((r) => String(r.id) === formData.resourceId)?.name}
                 resources={resources}
+                bookings={bookings}
               />
             </div>
           </div>

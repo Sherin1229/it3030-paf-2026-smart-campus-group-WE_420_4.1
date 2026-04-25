@@ -117,11 +117,11 @@ public class BookingService {
     }
 
     public BookingResponse createBooking(CreateBookingRequest request) {
-        String requesterEmail = safeTrim(request.requesterEmail()).toLowerCase(Locale.ROOT);
-        String resourceId = safeTrim(request.resourceId());
-        String resourceName = safeTrim(request.resourceName());
-        String resourceType = safeTrim(request.resourceType());
-        String purpose = safeTrim(request.purpose());
+        String requesterEmail = safeTrim(request.getRequesterEmail()).toLowerCase(Locale.ROOT);
+        String resourceId = safeTrim(request.getResourceId());
+        String resourceName = safeTrim(request.getResourceName());
+        String resourceType = safeTrim(request.getResourceType());
+        String purpose = safeTrim(request.getPurpose());
 
         if (requesterEmail.isBlank() || resourceId.isBlank() || resourceName.isBlank() || resourceType.isBlank()
                 || purpose.isBlank()) {
@@ -132,10 +132,11 @@ public class BookingService {
         LocalTime startTime;
         LocalTime endTime;
         try {
-            date = LocalDate.parse(safeTrim(request.date()));
-            startTime = LocalTime.parse(safeTrim(request.startTime()));
-            endTime = LocalTime.parse(safeTrim(request.endTime()));
+            date = LocalDate.parse(safeTrim(request.getDate()));
+            startTime = LocalTime.parse(safeTrim(request.getStartTime()));
+            endTime = LocalTime.parse(safeTrim(request.getEndTime()));
         } catch (DateTimeParseException ex) {
+            System.err.println("Booking creation failed: Invalid date/time format - " + ex.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid date or time format.");
         }
 
@@ -143,7 +144,8 @@ public class BookingService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Start time must be earlier than end time.");
         }
 
-        if (date.atTime(startTime).isBefore(LocalDateTime.now().plusHours(0))) {
+        if (date.atTime(startTime).isBefore(LocalDateTime.now().minusMinutes(5))) {
+            System.err.println("Booking creation failed: Past time requested - " + date + " " + startTime);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Bookings must be created for a future time.");
         }
@@ -155,11 +157,12 @@ public class BookingService {
                 startTime);
 
         if (overlaps) {
+            System.err.println("Booking creation failed: Slot overlap for resource " + resourceId + " on " + date);
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "Selected time slot is not available for this resource.");
         }
 
-        Integer attendees = request.attendees();
+        Integer attendees = request.getAttendees();
         if (attendees != null && attendees < 1) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Attendees must be at least 1.");
         }
@@ -180,7 +183,7 @@ public class BookingService {
         return toResponse(saved);
     }
 
-    private BookingResponse toResponse(BookingRequest booking) {
+    public BookingResponse toResponse(BookingRequest booking) {
         String bookingCode = "BK-" + String.format("%04d", booking.getId());
         
         String resourceCode = "";

@@ -35,10 +35,12 @@ const AdminCreateResourcePage = () => {
       setFetching(true)
       const data = await resourceService.getResourceById(id)
       
+      // Parse availabilityWindow (Expected format: "HH:mm-HH:mm")
       let start = '08:00'
       let end = '18:00'
-      if (data.availabilityWindow && data.availabilityWindow.includes('-')) {
-        const parts = data.availabilityWindow.split('-')
+      const window = data.availabilityWindow || data.availabilityWindows
+      if (window && window.includes('-')) {
+        const parts = window.split('-')
         start = parts[0]
         end = parts[1]
       }

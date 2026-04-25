@@ -17,4 +17,10 @@ public interface BookingRequestRepository extends JpaRepository<BookingRequest, 
 
     java.util.List<BookingRequest> findByRequesterEmailAndResourceIdAndDateAndStatus(
             String email, String resourceId, LocalDate date, String status);
+
+    long countByStatus(String status);
+
+    long countByStatusAndDate(String status, LocalDate date);
+
+    java.util.List<BookingRequest> findTop5ByStatusOrderByCreatedAtDesc(String status);
 }

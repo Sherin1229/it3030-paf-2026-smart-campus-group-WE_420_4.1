@@ -47,6 +47,7 @@ public class BookingController {
 
     @PostMapping
     public BookingResponse create(@RequestBody CreateBookingRequest request) {
+        System.out.println("DEBUG: Received booking request for " + request.getRequesterEmail());
         return bookingService.createBooking(request);
     }
 

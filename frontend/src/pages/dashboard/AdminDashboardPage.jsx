@@ -23,72 +23,83 @@ const StatCard = ({ label, value, icon, color, delay }) => (
 
 const AdminDashboardPage = () => {
   const { user } = useAuth()
-  const navigate = useNavigate()
-  const [stats, setStats] = useState({
-    pending: 0,
-    totalResources: 0,
-    activeResources: 0,
-    recentBookings: []
-  })
-  const [loading, setLoading] = useState(true)
+const navigate = useNavigate()
 
-  useEffect(() => {
-    fetchDashboardData()
-  }, [])
+const [statsData, setStatsData] = useState(null)
 
-  const fetchDashboardData = async () => {
-    try {
-      setLoading(true)
-      const [resources, bookingsResponse] = await Promise.all([
-        resourceService.getAllResources(),
-        fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'}/bookings`).then(res => res.json())
-      ])
+const [stats, setStats] = useState({
+  pending: 0,
+  totalResources: 0,
+  activeResources: 0,
+  recentBookings: []
+})
 
-      setStats({
-        pending: bookingsResponse.filter(b => b.status === 'PENDING').length,
-        totalResources: resources.length,
-        activeResources: resources.filter(r => r.status === 'ACTIVE').length,
-        recentBookings: bookingsResponse.slice(0, 5).map(b => ({
-          id: b.id,
-          user: b.requesterEmail,
-          resource: b.resourceName,
-          status: b.status,
-          date: b.date
-        }))
-      })
-    } catch (err) {
-      console.error('Failed to fetch dashboard data:', err)
-    } finally {
-      setLoading(false)
+const [loading, setLoading] = useState(true)
+
+useEffect(() => {
+  fetchDashboardData()
+}, [])
+
+const fetchDashboardData = async () => {
+  try {
+    setLoading(true)
+
+    const [adminStatsResponse, resources, bookingsResponse] = await Promise.all([
+      fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081/api'}/dashboard/admin/stats`),
+      resourceService.getAllResources(),
+      fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081/api'}/bookings`).then(res => res.json())
+    ])
+
+    if (adminStatsResponse.ok) {
+      const adminStats = await adminStatsResponse.json()
+      setStatsData(adminStats)
     }
+
+    setStats({
+      pending: bookingsResponse.filter(b => b.status === 'PENDING').length,
+      totalResources: resources.length,
+      activeResources: resources.filter(r => r.status === 'ACTIVE').length,
+      recentBookings: bookingsResponse.slice(0, 5).map(b => ({
+        id: b.id,
+        user: b.requesterEmail,
+        resource: b.resourceName,
+        status: b.status,
+        date: b.date
+      }))
+    })
+  } catch (err) {
+    console.error('Failed to fetch dashboard data:', err)
+  } finally {
+    setLoading(false)
   }
+}
 
   const cards = [
     {
-      label: 'Pending Requests',
-      value: stats.pending,
-      color: 'amber',
+      label: 'Pending Approvals',
+      value: statsData?.pendingApprovals ?? '0',
+      color: 'border-amber-400/20',
       delay: 0.1,
       icon: <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
     },
     {
-      label: 'Total Resources',
-      value: stats.totalResources,
-      color: 'sky',
+      label: 'Active Resources',
+      value: statsData?.activeResources ?? '0',
+      color: 'border-emerald-400/20',
       delay: 0.2,
       icon: <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
     },
     {
-      label: 'Active Facilities',
-      value: stats.activeResources,
-      color: 'emerald',
+      label: 'Conflict Flags',
+      value: statsData?.conflictFlags ?? '0',
+      color: 'border-rose-400/20',
       delay: 0.3,
       icon: <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
     },
     {
-      label: 'System Load',
-      value: 'Optimal',
-      color: 'purple',
+      label: 'Approved Today',
+      value: statsData?.approvedToday ?? '0',
+      color: 'border-sky-400/20',
       delay: 0.4,
       icon: <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
     }
@@ -148,71 +159,78 @@ const AdminDashboardPage = () => {
             </Link>
           </div>
 
-          <div className="space-y-4">
-            {loading ? (
-              <div className="py-20 text-center text-slate-500">Loading activity...</div>
-            ) : stats.recentBookings.length === 0 ? (
-              <div className="py-12 flex flex-col items-center justify-center text-center rounded-xl border border-dashed border-white/5">
-                <p className="text-slate-500 text-sm">No recent booking activity found.</p>
-              </div>
-            ) : (
-              stats.recentBookings.map((booking) => (
-                <div key={booking.id} className="flex items-center justify-between rounded-xl bg-white/5 p-4 transition hover:bg-white/10 group">
-                  <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-full bg-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-400 uppercase">
-                      {booking.user.substring(0, 2)}
-                    </div>
-                    <div>
-                      <p className="text-white text-sm font-bold group-hover:text-emerald-400 transition-colors">{booking.user.split('@')[0]}</p>
-                      <p className="text-slate-500 text-[10px] uppercase tracking-tighter">{booking.resource} • {booking.date}</p>
-                    </div>
-                  </div>
-                  <span className={`text-[10px] font-black uppercase tracking-tighter px-2.5 py-1 rounded-full ring-1 ring-inset ${
-                    booking.status === 'PENDING' 
-                      ? 'bg-amber-500/10 text-amber-400 ring-amber-500/20' 
-                      : booking.status === 'APPROVED' 
-                      ? 'bg-emerald-500/10 text-emerald-400 ring-emerald-500/20'
-                      : 'bg-rose-500/10 text-rose-400 ring-rose-500/20'
-                  }`}>
-                    {booking.status}
-                  </span>
-                </div>
-              ))
-            )}
-          </div>
-        </motion.div>
+<div className="mt-4 space-y-6">
 
-        {/* Quick Actions / Shortcuts */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="rounded-2xl border border-white/5 bg-slate-900/40 p-8 backdrop-blur-xl"
-        >
-          <h2 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-400"><path d="M12 2v4"/><path d="m16.2 7.8 2.9-2.9"/><path d="M18 12h4"/><path d="m16.2 16.2 2.9 2.9"/><path d="M12 18v4"/><path d="m4.9 19.1 2.9-2.9"/><path d="M2 12h4"/><path d="m4.9 4.9 2.9 2.9"/></svg>
-            Quick Actions
-          </h2>
-          <div className="grid gap-3">
-            {[
-              { label: 'System Analytics', icon: <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>, path: '/dashboard/admin/analytics', color: 'emerald' },
-              { label: 'Pending Approvals', icon: <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>, path: '/dashboard/admin/bookings', color: 'amber' },
-              { label: 'Manage Resources', icon: <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>, path: '/dashboard/admin/resources', color: 'sky' },
-              { label: 'Global Search', icon: <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>, path: '/dashboard/admin/resources', color: 'rose' }
-            ].map((action) => (
-              <button
-                key={action.label}
-                onClick={() => navigate(action.path)}
-                className="flex items-center gap-4 w-full rounded-xl border border-white/5 bg-white/5 p-4 text-sm font-bold text-slate-300 transition hover:bg-emerald-500 hover:text-white group"
-              >
-                <div className={`h-8 w-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 group-hover:bg-white/20 group-hover:text-white transition-colors`}>
-                  {action.icon}
-                </div>
-                {action.label}
-              </button>
+  {/* 🔹 Pending Approvals Table */}
+  <div className="overflow-hidden rounded-xl border border-white/10 bg-white/5">
+    {!statsData?.approvalQueue || statsData.approvalQueue.length === 0 ? (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <h3 className="text-sm font-semibold text-slate-200">No pending approvals</h3>
+        <p className="text-xs text-slate-400">Everything is caught up!</p>
+      </div>
+    ) : (
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-sm">
+          <thead>
+            <tr className="border-b border-white/10 text-slate-400">
+              <th className="px-6 py-4">Resource</th>
+              <th className="px-6 py-4">Requester</th>
+              <th className="px-6 py-4">Date</th>
+              <th className="px-6 py-4">Time</th>
+              <th className="px-6 py-4">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {statsData.approvalQueue.map((item) => (
+              <tr key={item.id}>
+                <td className="px-6 py-4 text-white">{item.resourceName}</td>
+                <td className="px-6 py-4 text-slate-300">{item.requesterEmail}</td>
+                <td className="px-6 py-4 text-slate-300">{item.date}</td>
+                <td className="px-6 py-4 text-slate-300">
+                  {item.startTime} - {item.endTime}
+                </td>
+                <td className="px-6 py-4">
+                  <Link
+                    to="/dashboard/admin/bookings"
+                    className="text-emerald-400 text-xs font-semibold"
+                  >
+                    Review
+                  </Link>
+                </td>
+              </tr>
             ))}
+          </tbody>
+        </table>
+      </div>
+    )}
+  </div>
+
+  {/* 🔹 Recent Activity */}
+  <div className="space-y-4">
+    {loading ? (
+      <div className="py-10 text-center text-slate-500">Loading activity...</div>
+    ) : stats.recentBookings.length === 0 ? (
+      <div className="py-10 text-center text-slate-500">
+        No recent booking activity
+      </div>
+    ) : (
+      stats.recentBookings.map((booking) => (
+        <div key={booking.id} className="flex justify-between bg-white/5 p-4 rounded-xl">
+          <div>
+            <p className="text-white text-sm font-bold">
+              {booking.user.split('@')[0]}
+            </p>
+            <p className="text-slate-400 text-xs">
+              {booking.resource} • {booking.date}
+            </p>
           </div>
-        </motion.div>
+          <span className="text-xs text-amber-400">{booking.status}</span>
+        </div>
+      ))
+    )}
+  </div>
+
+</div>
       </div>
     </div>
   )
