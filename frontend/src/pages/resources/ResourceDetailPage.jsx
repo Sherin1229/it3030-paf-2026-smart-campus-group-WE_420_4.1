@@ -157,21 +157,7 @@ const ResourceDetailPage = () => {
           )}
         </div>
 
-        {/* QR Code Card — Bonus Feature */}
-        {resource.status === "ACTIVE" && (
-          <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 text-center">
-            <p className="text-gray-400 text-sm mb-3">Quick check-in QR code</p>
-            <div className="w-24 h-24 bg-gray-700 rounded-lg mx-auto flex items-center justify-center mb-3">
-              <div className="grid grid-cols-5 gap-0.5">
-                {[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1].map((v, i) => (
-                  <div key={i} className={`w-3 h-3 rounded-sm ${v ? "bg-green-500" : "bg-gray-600"}`}></div>
-                ))}
-              </div>
-            </div>
-            <p className="text-gray-500 text-xs">Show this when checking in</p>
-            <p className="text-green-400 text-xs mt-1">Resource ID: {resource.id?.slice(0, 8)}...</p>
-          </div>
-        )}
+
       </div>
     </div>
   );

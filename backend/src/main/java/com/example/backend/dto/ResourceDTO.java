@@ -13,10 +13,13 @@ public class ResourceDTO {
     @NotBlank(message = "Name is required")
     private String name;
 
+    @NotBlank(message = "Resource code is required")
+    private String code;
+
     @NotNull(message = "Type is required")
     private ResourceType type;
 
-    @Min(value = 1, message = "Capacity must be at least 1")
+    @Min(value = 0, message = "Capacity must be 0 or more")
     private Integer capacity;
 
     @NotBlank(message = "Location is required")

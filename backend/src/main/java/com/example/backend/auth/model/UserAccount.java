@@ -53,6 +53,9 @@ public class UserAccount {
     @Column
     private LocalDateTime otpExpiry;
 
+    @Column(columnDefinition = "TEXT")
+    private String bio;
+
     public UserAccount(String name, String email, String passwordHash, String role, String provider) {
         this.name = name;
         this.email = email;

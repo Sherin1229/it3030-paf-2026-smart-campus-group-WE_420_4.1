@@ -6,6 +6,8 @@ import com.example.backend.auth.dto.GoogleLoginRequest;
 import com.example.backend.auth.dto.LoginRequest;
 import com.example.backend.auth.dto.RegisterRequest;
 import com.example.backend.auth.dto.ResetPasswordRequest;
+import com.example.backend.auth.dto.UpdateProfileRequest;
+import com.example.backend.auth.dto.ChangePasswordRequest;
 import com.example.backend.auth.dto.VerifyOtpRequest;
 import com.example.backend.auth.model.UserAccount;
 import com.example.backend.auth.repository.UserAccountRepository;
@@ -78,7 +80,7 @@ public class AuthService {
         }
 
         if (isAdminCredentials(email, password)) {
-            return new AuthResponse(ADMIN_NAME, ADMIN_EMAIL, "ADMIN", "LOCAL");
+            return new AuthResponse(ADMIN_NAME, ADMIN_EMAIL, "ADMIN", "LOCAL", null);
         }
 
         UserAccount user = userAccountRepository
@@ -171,6 +173,27 @@ public class AuthService {
         userAccountRepository.save(user);
     }
 
+    public AuthResponse updateProfile(String email, UpdateProfileRequest request) {
+        UserAccount user = userAccountRepository.findByEmail(normalizeEmail(email))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found."));
+        
+        user.setName(safeTrim(request.name()));
+        user.setBio(safeTrim(request.bio()));
+        return toResponse(userAccountRepository.save(user));
+    }
+
+    public void changePassword(ChangePasswordRequest request) {
+        UserAccount user = userAccountRepository.findByEmail(normalizeEmail(request.email()))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found."));
+
+        if (!passwordEncoder.matches(request.currentPassword(), user.getPasswordHash())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Incorrect current password.");
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(request.newPassword()));
+        userAccountRepository.save(user);
+    }
+
     private void sendEmail(String to, String subject, String text) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
@@ -180,7 +203,7 @@ public class AuthService {
     }
 
     private AuthResponse toResponse(UserAccount user) {
-        return new AuthResponse(user.getName(), user.getEmail(), user.getRole(), user.getProvider());
+        return new AuthResponse(user.getName(), user.getEmail(), user.getRole(), user.getProvider(), user.getBio());
     }
 
     private boolean isAdminCredentials(String email, String password) {
