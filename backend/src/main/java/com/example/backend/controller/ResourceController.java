@@ -48,8 +48,15 @@ public class ResourceController {
     // POST create new resource (Admin)
     @PostMapping
     public ResponseEntity<Resource> createResource(@Valid @RequestBody ResourceDTO dto) {
-        Resource created = resourceService.createResource(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        System.out.println("DEBUG: Creating resource: " + dto.getName() + " (Code: " + dto.getCode() + ", Type: " + dto.getType() + ")");
+        try {
+            Resource created = resourceService.createResource(dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        } catch (Exception e) {
+            System.err.println("ERROR: Failed to create resource: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     // PUT update resource (Admin)

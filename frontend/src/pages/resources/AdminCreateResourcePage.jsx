@@ -66,6 +66,18 @@ const AdminCreateResourcePage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
+    
+    // Frontend Validations
+    if (formData.capacity && parseInt(formData.capacity) <= 0) {
+      setError('Capacity must be a positive number.')
+      return
+    }
+
+    if (formData.startTime && formData.endTime && formData.startTime >= formData.endTime) {
+      setError('Availability start time must be earlier than the end time.')
+      return
+    }
+
     setLoading(true)
 
     try {
@@ -211,6 +223,7 @@ const AdminCreateResourcePage = () => {
                   <input
                     type="number"
                     name="capacity"
+                    min="1"
                     value={formData.capacity}
                     onChange={handleChange}
                     placeholder="Maximum occupancy or quantity"
