@@ -17,6 +17,7 @@ import CreateMaintenanceTicketPage from './pages/maintenance/CreateMaintenanceTi
 import MyMaintenanceTicketsPage from './pages/maintenance/MyMaintenanceTicketsPage'
 import AdminMaintenanceTicketsPage from './pages/maintenance/AdminMaintenanceTicketsPage'
 import VerifyBookingPage from './pages/bookings/VerifyBookingPage'
+import NotificationsPage from './pages/notifications/NotificationsPage'
 import UnauthorizedPage from './pages/UnauthorizedPage'
 import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
@@ -42,7 +43,7 @@ function App() {
     currentPath.startsWith('/dashboard/user') ||
     currentPath.startsWith('/dashboard/admin') ||
     currentPath.startsWith('/profile') ||
-    currentPath.startsWith('/maintenance')
+    currentPath.startsWith('/maintenance') ||
     currentPath.startsWith('/verify-booking')
 
   return (
@@ -77,6 +78,7 @@ function App() {
                 <Route path="/dashboard/user/maintenance/create" element={<CreateMaintenanceTicketPage />} />
                 <Route path="/dashboard/user/bookings/scan" element={<QRScannerPage />} />
                 <Route path="/dashboard/user/resources" element={<UserResourcesPage />} />
+                <Route path="/dashboard/user/notifications" element={<NotificationsPage />} />
                 <Route path="/profile" element={<UserProfilePage />} />
               </Route>
             </Route>
@@ -91,6 +93,7 @@ function App() {
                 <Route path="/dashboard/admin/analytics" element={<AdminAnalyticsPage />} />
                 <Route path="/dashboard/admin/bookings" element={<AdminBookingsPage />} />
                 <Route path="/dashboard/admin/maintenance" element={<AdminMaintenanceTicketsPage />} />
+                <Route path="/dashboard/admin/notifications" element={<NotificationsPage />} />
               </Route>
             </Route>
           </Route>
