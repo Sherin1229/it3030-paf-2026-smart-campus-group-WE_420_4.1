@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, Filter, ChevronRight } from 'lucide-react'
+import { Search, ChevronRight } from 'lucide-react'
 
 const PRIORITY_COLORS = {
   Low: 'bg-blue-500/10 text-blue-300 ring-1 ring-blue-500/20',
@@ -17,6 +17,10 @@ const STATUS_COLORS = {
   REJECTED: 'bg-red-500/10 text-red-300 ring-1 ring-red-500/20',
 }
 
+const toSearchable = (value) => (value ?? '').toString().trim().toLowerCase()
+const normalizeStatus = (value) => (value ?? '').toString().trim().toUpperCase()
+const normalizePriority = (value) => (value ?? '').toString().trim().toLowerCase()
+
 const TicketList = ({ tickets = [], onSelectTicket, isLoading, showFilters = true }) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedStatus, setSelectedStatus] = useState('ALL')
@@ -24,15 +28,24 @@ const TicketList = ({ tickets = [], onSelectTicket, isLoading, showFilters = tru
   const [sortBy, setSortBy] = useState('created')
 
   const filteredAndSortedTickets = useMemo(() => {
-    let filtered = tickets.filter(ticket => {
-      const matchesSearch = 
-        ticket.resourceName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        ticket.resourceLocation?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        ticket.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        ticket.ticketId?.toString().includes(searchTerm)
+    const normalizedSearchTerm = toSearchable(searchTerm)
+    const normalizedSelectedStatus = normalizeStatus(selectedStatus)
+    const normalizedSelectedPriority = normalizePriority(selectedPriority)
 
-      const matchesStatus = selectedStatus === 'ALL' || ticket.status === selectedStatus
-      const matchesPriority = selectedPriority === 'ALL' || ticket.priority === selectedPriority
+    let filtered = tickets.filter((ticket) => {
+      const matchesSearch =
+        normalizedSearchTerm === '' ||
+        toSearchable(ticket.resourceName).includes(normalizedSearchTerm) ||
+        toSearchable(ticket.resourceLocation).includes(normalizedSearchTerm) ||
+        toSearchable(ticket.description).includes(normalizedSearchTerm) ||
+        toSearchable(ticket.ticketId).includes(normalizedSearchTerm)
+
+      const matchesStatus =
+        normalizedSelectedStatus === 'ALL' ||
+        normalizeStatus(ticket.status) === normalizedSelectedStatus
+      const matchesPriority =
+        normalizedSelectedPriority === 'all' ||
+        normalizePriority(ticket.priority) === normalizedSelectedPriority
 
       return matchesSearch && matchesStatus && matchesPriority
     })
@@ -97,12 +110,12 @@ const TicketList = ({ tickets = [], onSelectTicket, isLoading, showFilters = tru
                 onChange={(e) => setSelectedStatus(e.target.value)}
                 className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:border-blue-500 focus:outline-none"
               >
-                <option value="ALL">All Statuses</option>
-                <option value="OPEN">Open</option>
-                <option value="IN_PROGRESS">In Progress</option>
-                <option value="RESOLVED">Resolved</option>
-                <option value="CLOSED">Closed</option>
-                <option value="REJECTED">Rejected</option>
+                <option value="ALL" className="bg-slate-900 text-white">All Statuses</option>
+                <option value="OPEN" className="bg-slate-900 text-white">Open</option>
+                <option value="IN_PROGRESS" className="bg-slate-900 text-white">In Progress</option>
+                <option value="RESOLVED" className="bg-slate-900 text-white">Resolved</option>
+                <option value="CLOSED" className="bg-slate-900 text-white">Closed</option>
+                <option value="REJECTED" className="bg-slate-900 text-white">Rejected</option>
               </select>
             </div>
 
@@ -113,11 +126,11 @@ const TicketList = ({ tickets = [], onSelectTicket, isLoading, showFilters = tru
                 onChange={(e) => setSelectedPriority(e.target.value)}
                 className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:border-blue-500 focus:outline-none"
               >
-                <option value="ALL">All Priorities</option>
-                <option value="Low">Low</option>
-                <option value="Medium">Medium</option>
-                <option value="High">High</option>
-                <option value="Critical">Critical</option>
+                <option value="ALL" className="bg-slate-900 text-white">All Priorities</option>
+                <option value="Low" className="bg-slate-900 text-white">Low</option>
+                <option value="Medium" className="bg-slate-900 text-white">Medium</option>
+                <option value="High" className="bg-slate-900 text-white">High</option>
+                <option value="Critical" className="bg-slate-900 text-white">Critical</option>
               </select>
             </div>
 
@@ -128,8 +141,8 @@ const TicketList = ({ tickets = [], onSelectTicket, isLoading, showFilters = tru
                 onChange={(e) => setSortBy(e.target.value)}
                 className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:border-blue-500 focus:outline-none"
               >
-                <option value="created">Recently Created</option>
-                <option value="priority">By Priority</option>
+                <option value="created" className="bg-slate-900 text-white">Recently Created</option>
+                <option value="priority" className="bg-slate-900 text-white">By Priority</option>
               </select>
             </div>
           </div>
@@ -142,6 +155,12 @@ const TicketList = ({ tickets = [], onSelectTicket, isLoading, showFilters = tru
       {/* Tickets List */}
       <AnimatePresence>
         <div className="space-y-3">
+          {filteredAndSortedTickets.length === 0 ? (
+            <div className="rounded-lg border border-white/10 bg-white/5 px-4 py-8 text-center text-gray-400">
+              No tickets match the current filters.
+            </div>
+          ) : null}
+
           {filteredAndSortedTickets.map((ticket, index) => (
             <motion.button
               key={ticket.ticketId}
