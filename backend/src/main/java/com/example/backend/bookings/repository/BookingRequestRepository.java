@@ -14,4 +14,7 @@ public interface BookingRequestRepository extends JpaRepository<BookingRequest, 
             LocalTime startTime);
 
     java.util.List<BookingRequest> findByRequesterEmailOrderByCreatedAtDesc(String requesterEmail);
+
+    java.util.List<BookingRequest> findByRequesterEmailAndResourceIdAndDateAndStatus(
+            String email, String resourceId, LocalDate date, String status);
 }

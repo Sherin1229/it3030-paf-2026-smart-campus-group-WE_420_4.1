@@ -11,6 +11,7 @@ import UserProfilePage from './pages/profile/UserProfilePage'
 import UserBookingsPage from './pages/bookings/UserBookingsPage'
 import MyBookingsPage from './pages/bookings/MyBookingsPage'
 import CreateBookingPage from './pages/bookings/CreateBookingPage'
+import QRScannerPage from './pages/bookings/QRScannerPage'
 import AdminBookingsPage from './pages/bookings/AdminBookingsPage'
 import VerifyBookingPage from './pages/bookings/VerifyBookingPage'
 import UnauthorizedPage from './pages/UnauthorizedPage'
@@ -68,6 +69,7 @@ function App() {
                 <Route path="/dashboard/user/bookings" element={<UserBookingsPage />} />
                 <Route path="/dashboard/user/bookings/my" element={<MyBookingsPage />} />
                 <Route path="/dashboard/user/bookings/create" element={<CreateBookingPage />} />
+                <Route path="/dashboard/user/bookings/scan" element={<QRScannerPage />} />
                 <Route path="/dashboard/user/resources" element={<UserResourcesPage />} />
                 <Route path="/profile" element={<UserProfilePage />} />
               </Route>

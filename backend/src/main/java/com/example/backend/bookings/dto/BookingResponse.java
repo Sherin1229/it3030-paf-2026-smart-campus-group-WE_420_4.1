@@ -7,6 +7,7 @@ public record BookingResponse(
         String resourceId,
         String resourceName,
         String resourceType,
+        String resourceCode,
         String date,
         String startTime,
         String endTime,

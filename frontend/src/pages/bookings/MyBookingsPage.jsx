@@ -8,6 +8,8 @@ const STATUS_COLORS = {
   PENDING:  { bg: 'bg-amber-500/10 text-amber-300 ring-amber-500/20',  dot: 'bg-amber-400' },
   APPROVED: { bg: 'bg-emerald-500/10 text-emerald-300 ring-emerald-500/20', dot: 'bg-emerald-400' },
   REJECTED: { bg: 'bg-rose-500/10 text-rose-300 ring-rose-500/20', dot: 'bg-rose-400' },
+  EXPIRED:  { bg: 'bg-slate-500/10 text-slate-400 ring-slate-500/20', dot: 'bg-slate-500' },
+  CHECKED_IN: { bg: 'bg-sky-500/10 text-sky-300 ring-sky-500/20', dot: 'bg-sky-400' },
 }
 
 const BOOKING_API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://10.50.20.47:8081/api'}/bookings`
@@ -206,36 +208,6 @@ const MyBookingsPage = () => {
                           <div className="sm:col-span-2">
                             <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Purpose</p>
                             <p className="mt-1 text-sm text-slate-300">{booking.purpose}</p>
-                          </div>
-                        </div>
-
-                        {/* QR Code Section */}
-                        <div className="mt-6 flex flex-col items-center justify-center rounded-2xl bg-white/5 p-6 border border-white/5 sm:flex-row sm:justify-start sm:gap-6">
-                          <div className="rounded-xl bg-white p-3 shadow-xl shadow-sky-500/10">
-                            <QRCodeSVG 
-                              value={`http://10.50.20.47:5173/verify-booking?code=${booking.bookingCode}`}
-                              size={100}
-                              level="H"
-                              includeMargin={false}
-                              imageSettings={{
-                                src: "/logo.png",
-                                x: undefined,
-                                y: undefined,
-                                height: 20,
-                                width: 20,
-                                excavate: true,
-                              }}
-                            />
-                          </div>
-                          <div className="mt-4 text-center sm:mt-0 sm:text-left">
-                            <h4 className="text-sm font-bold text-white">Digital Pass</h4>
-                            <p className="mt-1 text-xs text-slate-400 max-w-[200px]">
-                              Show this QR code at the {booking.resourceName} entrance for quick verification.
-                            </p>
-                            <div className="mt-3 flex items-center gap-2 text-[10px] font-medium text-sky-400">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                              Verified Secure
-                            </div>
                           </div>
                         </div>
 

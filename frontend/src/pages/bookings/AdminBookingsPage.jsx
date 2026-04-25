@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
+import { QRCodeCanvas } from 'qrcode.react'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import BookingCalendar from '../../components/bookings/BookingCalendar'
@@ -8,6 +9,8 @@ const STATUS_COLORS = {
   Pending:  { bg: 'bg-amber-500/10 text-amber-300 ring-amber-500/20',  dot: 'bg-amber-400' },
   Approved: { bg: 'bg-emerald-500/10 text-emerald-300 ring-emerald-500/20', dot: 'bg-emerald-400' },
   Rejected: { bg: 'bg-rose-500/10 text-rose-300 ring-rose-500/20', dot: 'bg-rose-400' },
+  Expired:  { bg: 'bg-slate-500/10 text-slate-400 ring-slate-500/20', dot: 'bg-slate-500' },
+  Checked_in: { bg: 'bg-sky-500/10 text-sky-300 ring-sky-500/20', dot: 'bg-sky-400' },
 }
 
 const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://10.50.20.47:8081/api'}/bookings`
@@ -19,6 +22,7 @@ const AdminBookingsPage = () => {
   const [filter, setFilter]   = useState('All')
   const [exporting, setExporting] = useState(false)
   const [viewMode, setViewMode] = useState('table') // 'table' | 'calendar'
+  const [qrBooking, setQrBooking] = useState(null)
 
   useEffect(() => {
     fetchBookings()
@@ -37,6 +41,8 @@ const AdminBookingsPage = () => {
         bookingCode: b.bookingCode,
         user: b.requesterEmail,
         resource: b.resourceName,
+        resourceId: b.resourceId,
+        resourceCode: b.resourceCode,
         date: b.date,
         status: b.status.charAt(0).toUpperCase() + b.status.slice(1).toLowerCase()
       }))
@@ -221,7 +227,7 @@ const AdminBookingsPage = () => {
       <>
       {/* Filter Tabs */}
       <div className="mt-6 flex gap-2 flex-wrap">
-        {['All', 'Pending', 'Approved', 'Rejected'].map(tab => (
+        {['All', 'Pending', 'Approved', 'Rejected', 'Expired', 'Checked_in'].map(tab => (
           <button
             key={tab}
             onClick={() => setFilter(tab)}
@@ -314,9 +320,19 @@ const AdminBookingsPage = () => {
                               </button>
                               <button
                                 onClick={() => updateStatus(req.id, 'Rejected')}
-                                className="rounded bg-rose-500/20 px-3 py-1 text-xs font-semibold text-rose-300 hover:bg-rose-500/30 transition-colors"
+                                className="rounded bg-rose-500/20 px-3 py-1 text-xs font-semibold text-rose-300 hover:bg-rose-500/20 transition-colors"
                               >
                                 Reject
+                              </button>
+                            </div>
+                          ) : req.status === 'Approved' ? (
+                            <div className="flex justify-end">
+                              <button
+                                onClick={() => setQrBooking(req)}
+                                className="rounded bg-sky-500/20 px-3 py-1 text-xs font-semibold text-sky-300 hover:bg-sky-500/30 transition-colors flex items-center gap-1.5"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="M7 7h1v1H7z"/><path d="M7 16h1v1H7z"/><path d="M16 7h1v1H16z"/><path d="M16 16h1v1H16z"/></svg>
+                                Show QR
                               </button>
                             </div>
                           ) : (
@@ -334,6 +350,56 @@ const AdminBookingsPage = () => {
       </div>
       </>
       )}
+
+      {/* QR Code Modal for Check-in */}
+      <AnimatePresence>
+        {qrBooking && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setQrBooking(null)}
+              className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-sm rounded-3xl border border-white/10 bg-slate-900 p-8 shadow-2xl text-center"
+            >
+              <h3 className="text-xl font-bold text-white">Check-in QR Code</h3>
+              <p className="mt-1 text-sm text-slate-400">{qrBooking.resource}</p>
+              <p className="text-[10px] text-slate-500 mt-0.5">Booking: {qrBooking.bookingCode}</p>
+
+              <div className="mt-8 flex justify-center rounded-2xl bg-white p-6 shadow-xl shadow-white/5">
+                <QRCodeCanvas 
+                  value={qrBooking.resourceCode || `RES-${qrBooking.resourceId}`} 
+                  size={200}
+                  level="H"
+                  includeMargin={false}
+                />
+              </div>
+
+              <div className="mt-6 space-y-2">
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Facility Code</p>
+                <p className="text-lg font-mono font-bold text-sky-400">{qrBooking.resourceCode || `RES-${qrBooking.resourceId}`}</p>
+              </div>
+
+              <p className="mt-4 text-[10px] text-slate-500 italic">
+                Ask the student ({qrBooking.user}) to scan this code using their "Self Check-in" tool.
+              </p>
+
+              <button
+                onClick={() => setQrBooking(null)}
+                className="mt-8 w-full rounded-xl bg-white/5 py-3 text-sm font-bold text-white transition hover:bg-white/10"
+              >
+                Done
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.section>
   )
 }

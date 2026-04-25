@@ -18,6 +18,9 @@ public class Resource {
     private Long id;
 
     private String name;
+    
+    @Column(unique = true)
+    private String code;
 
     @Enumerated(EnumType.STRING)
     private ResourceType type;
