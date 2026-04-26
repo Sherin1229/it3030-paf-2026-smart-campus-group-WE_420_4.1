@@ -23,6 +23,7 @@ public class Resource {
     private String code;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "type", columnDefinition = "VARCHAR(255)")
     private ResourceType type;
 
     private Integer capacity;
@@ -33,6 +34,7 @@ public class Resource {
     private String availabilityWindow;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "status", columnDefinition = "VARCHAR(255)")
     private ResourceStatus status = ResourceStatus.ACTIVE;
 
     @Column(length = 1000)
