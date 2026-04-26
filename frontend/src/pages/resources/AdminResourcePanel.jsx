@@ -252,7 +252,9 @@ const AdminResourcePanel = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="text-xs font-medium text-slate-300">{resource.availabilityWindow || 'Always Open'}</p>
+                      <p className="text-xs font-medium text-slate-300">
+                        {resource.availabilityWindow || resource.availabilityWindows || 'Always Open'}
+                      </p>
                     </td>
                     <td className="px-6 py-4">
                       <button
