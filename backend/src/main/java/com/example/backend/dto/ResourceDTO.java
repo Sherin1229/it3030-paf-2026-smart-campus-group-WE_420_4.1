@@ -25,7 +25,7 @@ public class ResourceDTO {
     @NotBlank(message = "Location is required")
     private String location;
 
-    private String availabilityWindows;
+    private String availabilityWindow;
 
     private ResourceStatus status;
 

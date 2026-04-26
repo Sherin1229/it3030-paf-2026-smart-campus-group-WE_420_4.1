@@ -67,15 +67,21 @@ public class BookingService {
             System.out.println(" - Booking: " + b.getStartTime() + " to " + b.getEndTime());
         }
 
-        // Find an approved booking for this user/resource today that overlaps with NOW
+        // Find an approved booking for this user/resource today that is within +/- 5 mins of startTime
         Optional<BookingRequest> activeBooking = bookings.stream()
-                .filter(b -> !now.isBefore(b.getStartTime()) && !now.isAfter(b.getEndTime()))
+                .filter(b -> {
+                    LocalTime checkInStart = b.getStartTime().minusMinutes(5);
+                    LocalTime checkInEnd = b.getStartTime().plusMinutes(5);
+                    boolean inWindow = !now.isBefore(checkInStart) && !now.isAfter(checkInEnd);
+                    System.out.println("Checking booking " + b.getStartTime() + ": now=" + now + ", window=[" + checkInStart + ", " + checkInEnd + "], match=" + inWindow);
+                    return inWindow;
+                })
                 .findFirst();
 
         if (activeBooking.isEmpty()) {
-            System.out.println("No active booking found for the current time window.");
+            System.out.println("No booking found within the +/- 5 minute start time window.");
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, 
-                "No active approved booking found for this time. Please check your schedule.");
+                "Check-in is only allowed within 5 minutes of your booking start time (" + now + ").");
         }
 
         BookingRequest booking = activeBooking.get();

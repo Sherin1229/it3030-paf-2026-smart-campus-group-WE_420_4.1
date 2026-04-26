@@ -49,13 +49,19 @@ public class ResourceService {
 
     // Create new resource (Admin)
     public Resource createResource(ResourceDTO dto) {
+        if (resourceRepository.findByCode(dto.getCode()).isPresent()) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.CONFLICT, 
+                "Resource with code " + dto.getCode() + " already exists."
+            );
+        }
         Resource resource = new Resource();
         resource.setName(dto.getName());
         resource.setCode(dto.getCode());
         resource.setType(dto.getType());
         resource.setCapacity(dto.getCapacity());
         resource.setLocation(dto.getLocation());
-        resource.setAvailabilityWindow(dto.getAvailabilityWindows());
+        resource.setAvailabilityWindow(dto.getAvailabilityWindow());
         resource.setStatus(dto.getStatus() != null ? dto.getStatus() : ResourceStatus.ACTIVE);
         resource.setDescription(dto.getDescription());
         return resourceRepository.save(resource);
@@ -69,7 +75,7 @@ public class ResourceService {
             resource.setType(dto.getType());
             resource.setCapacity(dto.getCapacity());
             resource.setLocation(dto.getLocation());
-            resource.setAvailabilityWindow(dto.getAvailabilityWindows());
+            resource.setAvailabilityWindow(dto.getAvailabilityWindow());
             resource.setStatus(dto.getStatus());
             resource.setDescription(dto.getDescription());
             return resourceRepository.save(resource);

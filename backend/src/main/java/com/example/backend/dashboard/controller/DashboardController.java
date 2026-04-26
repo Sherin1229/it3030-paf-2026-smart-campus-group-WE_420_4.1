@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/dashboard")
 @RequiredArgsConstructor
-@CrossOrigin(origins = {"http://localhost:5173", "http://127.0.0.1:5173", "http://10.50.20.47:5173", "http://10.199.20.47:5173", "http://172.28.27.15:5173"})
+@CrossOrigin(origins = {"http://localhost:5173", "http://127.0.0.1:5173", "http://10.50.20.47:5173", "http://10.199.20.47:5173", "http://172.28.27.15:5173", "http://172.20.10.10:5173"})
 public class DashboardController {
 
     private final BookingRequestRepository bookingRepository;
