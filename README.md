@@ -63,7 +63,6 @@ frontend/  # React frontend (UI, client logic)
 - Follow code style and naming conventions
 - Submit pull requests with clear descriptions
 
-## License
-Specify your license here (e.g., MIT, Apache 2.0)
+
 
 
